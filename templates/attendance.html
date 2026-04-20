@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+
+{% block title %}Mark Attendance - IYF FREE WEEKEND ACADEMY{% endblock %}
+
+{% block header %}Daily Attendance{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <!-- Hero Header -->
+  <div class="text-center mb-12">
+    <div class="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-600 rounded-3xl shadow-2xl p-8 md:p-12 backdrop-blur-sm">
+      <div class="w-24 h-24 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl">
+        <i class="fas fa-users text-3xl text-white"></i>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">Mark Attendance</h1>
+      <p class="text-xl text-white/90 max-w-lg mx-auto">
+        Record student presence for today's classes quickly and accurately
+      </p>
+    </div>
+  </div>
+
+  <!-- Selection Form -->
+  <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 mb-12 overflow-hidden">
+    <div class="px-8 py-6 bg-gradient-to-r from-emerald-50 to-green-50 border-b border-emerald-200">
+      <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+        <i class="fas fa-filter text-emerald-500 mr-3"></i>Select Class & Session
+      </h2>
+    </div>
+    
+    <div class="p-8">
+      <form id="attendanceForm">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <!-- Class -->
+          <div>
+            <label for="className" class="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+              <i class="fas fa-chalkboard-teacher text-emerald-500 mr-2"></i>Class <span class="text-red-500">*</span>
+            </label>
+            <select id="className" name="class_name" required 
+                    class="w-full px-5 py-4 pr-12 border border-gray-200 rounded-2xl bg-white/50 
+                           focus:ring-4 focus:ring-emerald-200 focus:border-emerald-500 
+                           transition-all duration-300 shadow-lg hover:shadow-xl text-lg 
+                           appearance-none cursor-pointer">
+              <option value="">Choose class...</option>
+              {% for class_name in classes %}
+              <option value="{{ class_name }}">{{ class_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Date -->
+          <div>
+            <label for="attendanceDate" class="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+              <i class="fas fa-calendar-day text-blue-500 mr-2"></i>Date <span class="text-red-500">*</span>
+            </label>
+            <input type="date" 
+                   id="attendanceDate" 
+                   name="date" 
+                   required
+                   class="w-full px-5 py-4 border border-gray-200 rounded-2xl bg-white/50 
+                          focus:ring-4 focus:ring-blue-200 focus:border-blue-500 
+                          transition-all duration-300 shadow-lg hover:shadow-xl text-lg">
+          </div>
+
+          <!-- Session -->
+          <div>
+            <label for="session" class="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+              <i class="fas fa-clock text-purple-500 mr-2"></i>Session <span class="text-red-500">*</span>
+            </label>
+            <select id="session" name="session" required 
+                    class="w-full px-5 py-4 pr-12 border border-gray-200 rounded-2xl bg-white/50 
+                           focus:ring-4 focus:ring-purple-200 focus:border-purple-500 
+                           transition-all duration-300 shadow-lg hover:shadow-xl text-lg 
+                           appearance-none cursor-pointer">
+              <option value="">Choose session...</option>
+              <option value="morning">☀️ Morning (8AM-12PM)</option>
+              <option value="afternoon">🌅 Afternoon (2PM-6PM)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="text-right">
+          <button type="submit" 
+                  id="saveBtn"
+                  disabled
+                  class="inline-flex items-center px-10 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 
+                         hover:from-emerald-600 hover:to-teal-700 text-white font-bold rounded-2xl 
+                         shadow-xl hover:shadow-2xl focus:ring-4 focus:ring-emerald-300 
+                         transition-all duration-300 hover:-translate-y-1 text-lg disabled:opacity-50 
+                         disabled:cursor-not-allowed disabled:shadow-none">
+            <i class="fas fa-check mr-2"></i>Load Students & Mark Attendance
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Dynamic Students Table -->
+  <div id="studentsContainer" class="space-y-6 hidden">
+    <!-- Loaded dynamically via JavaScript -->
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('attendanceForm');
+  const classSelect = document.getElementById('className');
+  const dateInput = document.getElementById('attendanceDate');
+  const sessionSelect = document.getElementById('session');
+  const studentsContainer = document.getElementById('studentsContainer');
+  const saveBtn = document.getElementById('saveBtn');
+  
+  // Set default date to today
+  const today = new Date().toISOString().split('T')[0];
+  dateInput.value = today;
+  
+  // Update save button state
+  function updateSaveButton() {
+    const valid = classSelect.value && dateInput.value && sessionSelect.value;
+    saveBtn.disabled = !valid;
+    saveBtn.classList.toggle('opacity-50', !valid);
+  }
+  
+  // Listen for form changes
+  [classSelect, dateInput, sessionSelect].forEach(el => {
+    el.addEventListener('change', updateSaveButton);
+  });
+  
+  // Handle class selection - load students
+  classSelect.addEventListener('change', async function() {
+    const className = this.value;
+    if (className) {
+      try {
+        studentsContainer.classList.remove('hidden');
+        studentsContainer.innerHTML = `
+          <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 p-8 animate-pulse">
+            <div class="flex items-center space-x-4 mb-6">
+              <div class="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+              <div class="flex-1 space-y-2">
+                <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            </div>
+            <div class="space-y-3">
+              ${Array(5).fill().map(() => `
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl animate-pulse">
+                  <div class="h-12 bg-gray-200 rounded-xl w-64"></div>
+                  <div class="flex space-x-2">
+                    <div class="w-20 h-10 bg-gray-200 rounded-xl"></div>
+                    <div class="w-20 h-10 bg-gray-200 rounded-xl"></div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        
+        const response = await fetch(`/api/classes/${className}/students`);
+        const data = await response.json();
+        
+        if (data.students && data.students.length > 0) {
+          renderStudentsTable(data.students);
+        } else {
+          studentsContainer.innerHTML = `
+            <div class="bg-white rounded-3xl shadow-2xl border border-yellow-100 p-12 text-center">
+              <div class="w-24 h-24 bg-yellow-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-users text-yellow-500 text-3xl"></i>
+              </div>
+              <h3 class="text-2xl font-bold text-gray-900 mb-2">No Students Found</h3>
+              <p class="text-lg text-gray-600 mb-8">This class appears to be empty. Add students first.</p>
+              <a href="/students/add" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all">
+                <i class="fas fa-plus mr-2"></i>Add Students
+              </a>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        studentsContainer.innerHTML = `
+          <div class="bg-white rounded-3xl shadow-2xl border border-red-100 p-12 text-center">
+            <div class="w-24 h-24 bg-red-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
+              <i class="fas fa-exclamation-triangle text-red-500 text-3xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">Error Loading Students</h3>
+            <p class="text-lg text-gray-600 mb-8">Please try again or contact support.</p>
+            <button onclick="loadStudents()" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl">
+              <i class="fas fa-refresh mr-2"></i>Retry
+            </button>
+          </div>
+        `;
+      }
+    } else {
+      studentsContainer.classList.add('hidden');
+    }
+    updateSaveButton();
+  });
+
+  function renderStudentsTable(students) {
+    studentsContainer.innerHTML = `
+      <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
+        <div class="px-8 py-6 bg-gradient-to-r from-emerald-50 to-green-50 border-b border-emerald-200">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xl font-bold text-gray-900 flex items-center">
+              <i class="fas fa-list mr-2 text-emerald-500"></i>
+              Students in ${classSelect.value} (${students.length})
+            </h3>
+            <span class="px-4 py-2 bg-white border rounded-xl text-sm font-semibold text-emerald-700 shadow-sm">
+              Select All Present <input type="checkbox" id="selectAll" class="ml-2">
+            </span>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-8 py-4 text-left">
+                  <div class="font-bold text-lg text-gray-900">Student</div>
+                </div>
+                <th class="px-8 py-4 text-center">
+                  <div class="font-bold text-lg text-gray-900 w-32">Status</div>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              ${students.map((student, index) => `
+                <tr class="group hover:bg-emerald-50/50 transition-all duration-200">
+                  <td class="px-8 py-6">
+                    <div class="flex items-center space-x-4">
+                      <div class="w-12 h-12 bg-gradient-to-r from-emerald-400 to-green-500 rounded-2xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                        <i class="fas fa-user text-white text-lg"></i>
+                      </div>
+                      <div>
+                        <div class="font-semibold text-gray-900">${student.name}</div>
+                        <div class="text-sm text-gray-500">${student.admission_number || 'No ID'}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-8 py-6 text-center">
+                    <div class="inline-flex bg-white shadow-lg rounded-2xl p-1 space-x-1">
+                      <label class="flex items-center cursor-pointer p-3 rounded-xl hover:bg-green-50 transition-all group-hover:bg-green-50 w-full justify-center font-semibold text-green-700">
+                        <input type="radio" name="status_${student.id}" value="present" class="sr-only" required>
+                        <i class="fas fa-check-circle text-lg"></i>
+                        <span class="text-xs">Present</span>
+                      </label>
+                      <label class="flex items-center cursor-pointer p-3 rounded-xl hover:bg-red-50 transition-all group-hover:bg-red-50 w-full justify-center font-semibold text-red-700">
+                        <input type="radio" name="status_${student.id}" value="absent" class="sr-only">
+                        <i class="fas fa-times-circle text-lg"></i>
+                        <span class="text-xs">Absent</span>
+                      </label>
+                    </div>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Summary & Save -->
+        <div class="px-8 py-6 bg-gradient-to-r from-green-50 to-emerald-50 border-t border-emerald-200">
+          <div class="flex flex-col md:flex-row gap-6 items-center justify-between">
+            <div class="flex items-center space-x-6 text-sm">
+              <span id="presentCount" class="px-4 py-2 bg-emerald-100 text-emerald-800 font-bold rounded-xl">0 Present</span>
+              <span id="absentCount" class="px-4 py-2 bg-red-100 text-red-800 font-bold rounded-xl">0 Absent</span>
+              <span id="totalCount" class="px-4 py-2 bg-gray-100 text-gray-800 font-bold rounded-xl">-</span>
+            </div>
+            <button type="submit" 
+                    class="px-12 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 
+                           text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl focus:ring-4 focus:ring-emerald-300 
+                           transition-all duration-300 hover:-translate-y-1 text-lg">
+              <i class="fas fa-save mr-2"></i>Save Attendance
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Select all functionality
+    document.getElementById('selectAll').addEventListener('change', function() {
+      const radios = document.querySelectorAll('input[value="present"]');
+      radios.forEach(radio => radio.checked = this.checked);
+      updateCounts();
+    });
+
+    // Update counts
+    function updateCounts() {
+      const present = document.querySelectorAll('input[value="present"]:checked').length;
+      const total = document.querySelectorAll('input[name^="status_"]').length;
+      const absent = total - present;
+      
+      document.getElementById('presentCount').textContent = `${present} Present`;
+      document.getElementById('absentCount').textContent = `${absent} Absent`;
+      document.getElementById('totalCount').textContent = `${total} Total`;
+    }
+
+    // Listen for radio changes
+    studentsContainer.addEventListener('change', 'input[type="radio"]', updateCounts);
+
+    updateCounts();
+  }
+
+  // Form submission
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData();
+    formData.append('class_name', classSelect.value);
+    formData.append('date', dateInput.value);
+    formData.append('session', sessionSelect.value);
+    
+    // Add student statuses
+    document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
+      formData.append(radio.name, radio.value);
+    });
+    
+    try {
+      const response = await fetch('/teacher/attendance', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        // Success animation
+        saveBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Saved!';
+        saveBtn.classList.add('bg-green-500');
+        setTimeout(() => {
+          location.reload();
+        }, 1500);
+      } else {
+        alert(data.message || 'Error saving attendance');
+      }
+    } catch (error) {
+      alert('Network error. Please try again.');
+      console.error(error);
+    }
+  });
+});
+</script>
+
+{% endblock %}
+

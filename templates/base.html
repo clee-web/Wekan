@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}IYF FREE WEEKEND ACADEMY{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; }
+            .print-full { width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .print-content { display: block !important; }
+        }
+        
+        /* Responsive sidebar */
+        @media (max-width: 1024px) {
+            .sidebar {
+                position: fixed;
+                left: -100%;
+                transition: left 0.3s ease-in-out;
+                z-index: 50;
+            }
+            .sidebar.open {
+                left: 0;
+            }
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 40;
+            }
+            .sidebar-overlay.open {
+                display: block;
+            }
+        }
+        
+        /* Colorful icons */
+        .fa-home { color: #667eea !important; }
+        .fa-users { color: #764ba2 !important; }
+        .fa-chart-bar { color: #f093fb !important; }
+        .fa-user-graduate { color: #667eea !important; }
+        .fa-graduation-cap { color: #764ba2 !important; }
+        .fa-money-bill { color: #10b981 !important; }
+        .fa-edit { color: #f59e0b !important; }
+        .fa-search { color: #667eea !important; }
+        .fa-plus { color: #10b981 !important; }
+        .fa-arrow-right { color: #667eea !important; }
+        .fa-chevron-left { color: #764ba2 !important; }
+        .fa-chevron-right { color: #764ba2 !important; }
+        .fa-check-circle { color: #10b981 !important; }
+        .fa-exclamation-circle { color: #ef4444 !important; }
+        .fa-info-circle { color: #3b82f6 !important; }
+        .fa-user-plus { color: #10b981 !important; }
+        .fa-user-tie { color: #764ba2 !important; }
+        .fa-lightbulb { color: #f59e0b !important; }
+        .fa-asterisk { color: #ef4444 !important; }
+        .fa-shield-alt { color: #10b981 !important; }
+        .fa-arrow-left { color: #667eea !important; }
+        .fa-times { color: #ef4444 !important; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-50 font-sans antialiased">
+    <div class="flex h-screen print-full">
+        <!-- Sidebar Overlay for Mobile -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        
+        <!-- Sidebar -->
+        <div class="w-64 bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900 no-print shadow-2xl sidebar" id="sidebar">
+            <!-- Logo -->
+            <div class="p-6 border-b border-purple-500/20">
+                <a href="{{ url_for('index') }}" class="flex items-center space-x-3 group">
+                    <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-purple-500/50 transition-all duration-300 transform group-hover:scale-110">
+                        <i class="fas fa-graduation-cap text-white text-lg"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-base font-bold text-white tracking-wide">IYF ACADEMY</span>
+                        <span class="text-xs text-purple-300">Free Weekend</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="mt-6 px-4">
+                <div class="space-y-2">
+                    <a href="{{ url_for('index') }}"
+                       class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 transform
+                              {% if request.endpoint == 'index' %}
+                              bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/30
+                              {% else %}
+                              text-gray-300 hover:bg-white/10 hover:text-white
+                              {% endif %}">
+                        <i class="fas fa-home w-5 text-center
+                              {% if request.endpoint == 'index' %}
+                              text-white
+                              {% else %}
+                              text-purple-400
+                              {% endif %}"></i>
+                        <span class="ml-3">Dashboard</span>
+                        {% if request.endpoint == 'index' %}
+                        <div class="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                        {% endif %}
+                    </a>
+
+                    <a href="{{ url_for('search_students') }}"
+                       class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 transform
+                              {% if request.endpoint == 'search_students' %}
+                              bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/30
+                              {% else %}
+                              text-gray-300 hover:bg-white/10 hover:text-white
+                              {% endif %}">
+                        <i class="fas fa-users w-5 text-center
+                              {% if request.endpoint == 'search_students' %}
+                              text-white
+                              {% else %}
+                              text-purple-400
+                              {% endif %}"></i>
+                        <span class="ml-3">Students</span>
+                        {% if request.endpoint == 'search_students' %}
+                        <div class="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                        {% endif %}
+                    </a>
+
+                    <a href="{{ url_for('financial_report') }}"
+                       class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 transform
+                              {% if request.endpoint == 'financial_report' %}
+                              bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/30
+                              {% else %}
+                              text-gray-300 hover:bg-white/10 hover:text-white
+                              {% endif %}">
+                        <i class="fas fa-chart-bar w-5 text-center
+                              {% if request.endpoint == 'financial_report' %}
+                              text-white
+                              {% else %}
+                              text-purple-400
+                              {% endif %}"></i>
+                        <span class="ml-3">Reports</span>
+                        {% if request.endpoint == 'financial_report' %}
+                        <div class="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                        {% endif %}
+                    </a>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Navigation -->
+            <header class="bg-white border-b no-print">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center space-x-4">
+                        <!-- Mobile Menu Toggle -->
+                        <button class="lg:hidden text-gray-600 hover:text-gray-800" onclick="toggleSidebar()">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <h1 class="text-xl font-semibold text-gray-800">{% block header %}Dashboard{% endblock %}</h1>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <!-- Current Date -->
+                        <div class="text-sm text-gray-600 hidden sm:block">
+                            {{ now.strftime('%B %Y') }}
+                        </div>
+
+                        <!-- User Menu -->
+                        {% if current_user.is_authenticated %}
+                        <div class="relative">
+                            <button class="flex items-center space-x-2 text-gray-600 hover:text-gray-800">
+                                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <span class="text-sm font-medium hidden sm:block">{{ current_user.username }}</span>
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6 print-content">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="mb-4 p-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-700{% elif category == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                                {% if category == 'success' %}
+                                    <i class="fas fa-check-circle mr-2"></i>
+                                {% elif category == 'error' %}
+                                    <i class="fas fa-exclamation-circle mr-2"></i>
+                                {% else %}
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                {% endif %}
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    function toggleTransactionNumber() {
+        var paymentMethod = document.getElementById("payment_method");
+        var transactionNumberDiv = document.getElementById("transaction_number_div");
+        if (paymentMethod && transactionNumberDiv) {
+            if (paymentMethod.value === "mpesa") {
+                transactionNumberDiv.style.display = "block";
+            } else {
+                transactionNumberDiv.style.display = "none";
+            }
+        }
+    }
+
+    function toggleSidebar() {
+        var sidebar = document.getElementById('sidebar');
+        var overlay = document.getElementById('sidebarOverlay');
+        if (sidebar && overlay) {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+        }
+    }
+
+    document.getElementById('sidebarOverlay')?.addEventListener('click', toggleSidebar);
+
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleTransactionNumber();
+    });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

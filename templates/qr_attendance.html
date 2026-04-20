@@ -1,0 +1,314 @@
+{% extends "base.html" %}
+
+{% block title %}QR Attendance Scanner{% endblock %}
+
+{% block extra_css %}
+<style>
+    .scanner-container {
+        position: relative;
+        width: 100%;
+        height: 400px;
+        overflow: hidden;
+        border-radius: 1rem;
+        background: #000;
+    }
+    .scanner-video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .scanner-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+    }
+    .scan-frame {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 250px;
+        height: 250px;
+        border: 4px solid #10b981;
+        border-radius: 1rem;
+        animation: pulseBorder 2s infinite;
+    }
+    .scan-line {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 240px;
+        height: 4px;
+        background: linear-gradient(90deg, transparent, #10b981, transparent);
+        animation: scanLine 2s infinite;
+    }
+    .result-hidden {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.3s ease;
+    }
+    .result-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .leadership-count {
+        background: linear-gradient(45deg, #f59e0b, #fbbf24);
+        color: white;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+    }
+    @media (max-width: 768px) {
+        .scan-frame {
+            width: 200px;
+            height: 200px;
+        }
+    }
+    @keyframes pulseBorder {
+        0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    @keyframes scanLine {
+        0% { transform: translate(-50%, -50%) translateX(-100%); }
+        100% { transform: translate(-50%, -50%) translateX(100%); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-4xl font-bold text-gray-900 mb-2">QR Attendance Scanner</h1>
+                <p class="text-lg text-gray-600">Saturday Class | Sunday Class + Leadership</p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="/teacher/login" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-secondary transition-colors duration-300 shadow-sm hover:shadow-md">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Teacher Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Scanner Section -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-primary text-white p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold flex items-center">
+                                <i class="fas fa-qrcode mr-3"></i>
+                                QR Attendance Register
+                            </h2>
+                            <p class="text-blue-100 mt-1">Scan student QR codes for instant attendance</p>
+                        </div>
+                        <button id="scanner-toggle" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-video mr-2"></i>
+                            Camera
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <!-- Scanner Container -->
+                    <div class="scanner-container">
+                        <video id="qr-video" class="scanner-video" autoplay playsinline></video>
+                        <div class="scanner-overlay">
+                            <div class="scan-frame"></div>
+                            <div class="scan-line"></div>
+                        </div>
+                    </div>
+
+                    <!-- Session Type Controls -->
+                    <div class="mt-6 flex justify-center">
+                        <div class="inline-flex rounded-lg border border-gray-200 bg-white shadow-sm" role="group">
+                            <button id="class-btn" onclick="setSessionType('class')" 
+                                    class="px-6 py-3 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 rounded-l-lg border-r border-gray-200 transition-colors duration-200 focus:z-10 focus:outline-none focus:ring-2 focus:ring-primary">
+                                <i class="fas fa-graduation-cap mr-2"></i>
+                                Class
+                            </button>
+                            <button id="leadership-btn" onclick="setSessionType('leadership')" 
+                                    class="px-6 py-3 text-sm font-medium text-white bg-primary hover:bg-secondary rounded-r-lg transition-colors duration-200 focus:z-10 focus:outline-none focus:ring-2 focus:ring-primary">
+                                <i class="fas fa-crown mr-2"></i>
+                                Leadership
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Results Display -->
+                    <div id="scan-result" class="mt-6 p-4 bg-gray-50 rounded-lg result-hidden">
+                        <h3 id="result-title" class="text-lg font-semibold text-center mb-3"></h3>
+                        <div id="result-details" class="text-center"></div>
+                        <div class="leadership-count mt-3" id="leadership-count"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-1 space-y-6">
+            <!-- Quick Actions -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    <i class="fas fa-bolt text-warning mr-2"></i>
+                    Quick Actions
+                </h3>
+                <div class="space-y-3">
+                    <button onclick="startScan()" class="w-full bg-success text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-600 transition-colors duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+                        <i class="fas fa-camera fa-lg mr-2"></i>
+                        Start Scanner
+                    </button>
+                    <button onclick="stopScan()" class="w-full bg-danger text-white py-3 px-4 rounded-lg font-semibold hover:bg-red-600 transition-colors duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+                        <i class="fas fa-stop fa-lg mr-2"></i>
+                        Stop Scanner
+                    </button>
+                </div>
+            </div>
+
+            <!-- Session Info -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    <i class="fas fa-info-circle text-info mr-2"></i>
+                    Session Information
+                </h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">Current Session:</span>
+                        <span id="current-session" class="text-sm font-semibold text-primary">Class</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">Scanner Status:</span>
+                        <span id="scanner-status" class="text-sm font-semibold text-gray-500">Inactive</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">Today's Date:</span>
+                        <span class="text-sm font-semibold text-gray-700">{{ 'now'|datetimeformat('%B %d, %Y') }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test QR Code -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    <i class="fas fa-qrcode text-primary mr-2"></i>
+                    Test QR Code
+                </h3>
+                <p class="text-sm text-gray-600 mb-4">Generate a test QR code for testing the scanner</p>
+                <a href="{{ url_for('generate_student_qr', student_id=1) }}" 
+                   target="_blank" 
+                   class="w-full inline-flex items-center justify-center px-4 py-3 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+                    <i class="fas fa-qrcode mr-2"></i>
+                    Generate Test QR
+                </a>
+            </div>
+
+            <!-- Instructions -->
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                <h3 class="text-lg font-semibold text-blue-900 mb-3">
+                    <i class="fas fa-question-circle mr-2"></i>
+                    How to Use
+                </h3>
+                <ol class="text-sm text-blue-800 space-y-2 list-decimal list-inside">
+                    <li>Click "Start Scanner" to activate the camera</li>
+                    <li>Position the QR code within the green frame</li>
+                    <li>Choose between Class or Leadership session</li>
+                    <li>Attendance will be marked automatically</li>
+                    <li>View results in the display area below</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Scans -->
+    <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">
+            <i class="fas fa-history text-primary mr-2"></i>
+            Recent Scans Today
+        </h3>
+        <div id="recent-scans" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="text-center py-8 text-gray-500 col-span-full">
+                <i class="fas fa-inbox fa-3x mb-3"></i>
+                <p>No scans yet today</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="{{ url_for('static', filename='js/qr_scanner.js') }}"></script>
+<script>
+    let currentSessionType = 'class';
+    
+    function setSessionType(type) {
+        currentSessionType = type;
+        
+        // Update button styles
+        const classBtn = document.getElementById('class-btn');
+        const leadershipBtn = document.getElementById('leadership-btn');
+        
+        if (type === 'class') {
+            classBtn.className = 'px-6 py-3 text-sm font-medium text-white bg-primary hover:bg-secondary rounded-l-lg border-r border-gray-200 transition-colors duration-200 focus:z-10 focus:outline-none focus:ring-2 focus:ring-primary';
+            leadershipBtn.className = 'px-6 py-3 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 rounded-r-lg border-r border-gray-200 transition-colors duration-200 focus:z-10 focus:outline-none focus:ring-2 focus:ring-primary';
+        } else {
+            classBtn.className = 'px-6 py-3 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 rounded-l-lg border-r border-gray-200 transition-colors duration-200 focus:z-10 focus:outline-none focus:ring-2 focus:ring-primary';
+            leadershipBtn.className = 'px-6 py-3 text-sm font-medium text-white bg-primary hover:bg-secondary rounded-r-lg transition-colors duration-200 focus:z-10 focus:outline-none focus:ring-2 focus:ring-primary';
+        }
+        
+        // Update session display
+        document.getElementById('current-session').textContent = type.charAt(0).toUpperCase() + type.slice(1);
+    }
+    
+    function startScan() {
+        // Update scanner status
+        document.getElementById('scanner-status').textContent = 'Active';
+        document.getElementById('scanner-status').className = 'text-sm font-semibold text-success';
+        
+        // Start scanner and camera
+        if (typeof scanner !== 'undefined' && scanner) {
+            if (!scanner.stream) {
+                // Camera was stopped, need to reinitialize
+                scanner.init();
+            } else {
+                // Camera is already running, just start scanning
+                scanner.scanning = true;
+                scanner.scanLoop();
+            }
+        }
+    }
+    
+    function stopScan() {
+        // Update scanner status
+        document.getElementById('scanner-status').textContent = 'Inactive';
+        document.getElementById('scanner-status').className = 'text-sm font-semibold text-gray-500';
+        
+        // Stop scanner and turn off camera
+        if (typeof scanner !== 'undefined' && scanner) {
+            scanner.scanning = false;
+            if (scanner.stream) {
+                scanner.stream.getTracks().forEach(track => track.stop());
+                scanner.stream = null;
+            }
+            // Clear video element
+            const video = document.getElementById('qr-video');
+            if (video) {
+                video.srcObject = null;
+            }
+        }
+    }
+    
+    // Initialize session type
+    setSessionType('class');
+</script>
+{% endblock %}

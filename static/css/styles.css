@@ -1,0 +1,52 @@
+/* Custom Styles */
+body {
+    font-family: sans-serif;
+}
+
+#studentCategories h4 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #007bff;
+}
+
+.list-group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.student-amount {
+    font-size: 0.9em;
+    color: #6c757d;
+}
+
+/* Initially hide sections until a class is selected */
+#fullPaymentSection, #partialPaymentSection, #noPaymentSection {
+    display: none;
+}
+
+/* QR Code Styles */
+.qr-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.qr-container img {
+    max-width: 128px;
+    max-height: 128px;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+@media print {
+    .qr-container {
+        break-inside: avoid;
+    }
+    
+    .qr-container img {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        filter: grayscale(100%) contrast(200%);
+    }
+}

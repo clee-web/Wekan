@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academy Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#1e40af',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                        info: '#3b82f6'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-border {
+            --tw-gradient-from: #2563eb;
+            --tw-gradient-to: #1e40af;
+            --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+            background: linear-gradient(135deg, var(--tw-gradient-from), var(--tw-gradient-to));
+        }
+        
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .card-shadow:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen transition-colors duration-300 ease-in-out">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Professional Header -->
+        <div class="mb-12">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-900 mb-2">Academy Dashboard</h1>
+                    <p class="text-lg text-gray-600">Welcome back, {{ current_user.username }}</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <input type="checkbox" id="theme-toggle" class="sr-only peer">
+                        <label for="theme-toggle" class="cursor-pointer bg-gray-200 rounded-full p-2 hover:bg-gray-300 transition-colors duration-300">
+                            <div class="w-12 h-6 bg-gray-300 rounded-full peer-checked:bg-primary peer-checked:after:translate-x-full after:absolute after:w-6 after:h-6 after:rounded-full after:bg-white after:transition-transform after:duration-300 after:content-['']"></div>
+                        </label>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-2 hover:shadow-md transition-shadow">
+                        <i class="fas fa-bell text-gray-500"></i>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-2 hover:shadow-md transition-shadow">
+                        <i class="fas fa-cog text-gray-500"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <p class="text-sm text-gray-500">Last updated: {{ last_updated }}</p>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <!-- Student Metrics -->
+            <div class="bg-white rounded-xl card-shadow p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-50 text-blue-500">
+                        <i class="fas fa-users text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Student Enrollment</p>
+                        <div class="flex items-baseline space-x-2">
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-800">{{ active_students }}</h3>
+                                <p class="text-xs text-gray-500">Active</p>
+                            </div>
+                            <div class="text-gray-300">/</div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-400">{{ total_students }}</h3>
+                                <p class="text-xs text-gray-500">Total</p>
+                            </div>
+                        </div>
+                        <div class="mt-2 text-sm text-gray-500">
+                            <p>Current academic year enrollment</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Passport Fee Collection -->
+            <div class="bg-white rounded-xl card-shadow p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-50 text-green-500">
+                        <i class="fas fa-passport text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Passport Fee</p>
+                        <div class="flex items-baseline">
+                            <h3 class="text-2xl font-bold text-gray-800">{{ passport_count }}</h3>
+                            <span class="ml-2 text-sm text-gray-500">paid</span>
+                        </div>
+                        <div class="mt-2 text-sm text-gray-500">
+                            <p>KES 500 per student</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graduation Fee Collection -->
+            <div class="bg-white rounded-xl card-shadow p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-purple-50 text-purple-500">
+                        <i class="fas fa-graduation-cap text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Graduation Fee</p>
+                        <div class="flex items-baseline">
+                            <h3 class="text-2xl font-bold text-gray-800">{{ graduation_count }}</h3>
+                            <span class="ml-2 text-sm text-gray-500">paid</span>
+                        </div>
+                        <div class="mt-2 text-sm text-gray-500">
+                            <p>KES 1000 per student</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial Summary -->
+            <div class="bg-white rounded-xl card-shadow p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-yellow-50 text-yellow-500">
+                        <i class="fas fa-money-bill-wave text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Total Revenue</p>
+                        <div class="flex items-baseline">
+                            <h3 class="text-2xl font-bold text-gray-800">Ksh {{ "%.2f"|format(total_revenue) }}</h3>
+                        </div>
+                        <div class="mt-2 text-sm text-gray-500">
+                            <p>Total fees collected this term</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <!-- Class Distribution Chart -->
+            <div class="bg-white rounded-xl card-shadow p-6 border border-gray-100">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="text-xl font-semibold mb-1">Class Distribution</h3>
+                        <p class="text-sm text-gray-500">Student enrollment by course</p>
+                    </div>
+                    <button class="text-sm text-primary hover:text-primary-dark" id="classChartRefresh">
+                        <i class="fas fa-sync-alt mr-1"></i>Refresh
+                    </button>
+                </div>
+                <div id="classDistributionChartContainer" class="relative h-[300px]">
+                    <div class="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                    </div>
+                    <canvas id="classDistributionChart"></canvas>
+                </div>
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>Shows the distribution of students across different courses</p>
+                </div>
+            </div>
+
+            <!-- Payment Status Chart -->
+            <div class="bg-white rounded-xl card-shadow p-6 border border-gray-100">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="text-xl font-semibold mb-1">Payment Status Overview</h3>
+                        <p class="text-sm text-gray-500">Fee collection status</p>
+                    </div>
+                    <button class="text-sm text-primary hover:text-primary-dark" id="paymentChartRefresh">
+                        <i class="fas fa-sync-alt mr-1"></i>Refresh
+                    </button>
+                </div>
+                <div id="paymentStatusChartContainer" class="relative h-[300px]">
+                    <div class="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                    </div>
+                    <canvas id="paymentStatusChart"></canvas>
+                </div>
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>Breakdown of fee payments: Passport (KES 500) and Graduation (KES 1000)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+            <!-- Student Management -->
+            <a href="{{ url_for('add_student') }}" 
+               class="bg-white rounded-xl card-shadow p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:bg-blue-50 group">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-500 group-hover:bg-blue-200">
+                        <i class="fas fa-user-plus text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="font-semibold text-gray-800">Add New Student</h3>
+                        <p class="text-sm text-gray-500">Register a new student</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('search_students') }}"
+               class="bg-white rounded-xl card-shadow p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:bg-green-50 group">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 text-green-500 group-hover:bg-green-200">
+                        <i class="fas fa-search text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="font-semibold text-gray-800">Search Students</h3>
+                        <p class="text-sm text-gray-500">Find and manage students</p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Reports -->
+            <a href="{{ url_for('download_report') }}"
+               class="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl card-shadow p-6 border border-yellow-200 hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:from-yellow-500 hover:to-orange-600 group">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-white/30 text-white group-hover:bg-white/40">
+                        <i class="fas fa-file-excel text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="font-semibold text-white">Download Report</h3>
+                        <p class="text-sm text-white/90">Export payment data</p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Payment Management -->
+            <a href="{{ url_for('main.student_payment_status') }}"
+               class="bg-white rounded-xl card-shadow p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:bg-teal-50 group">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-teal-100 text-teal-500 group-hover:bg-teal-200">
+                        <i class="fas fa-user-graduate text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="font-semibold text-gray-800">Payment Status</h3>
+                        <p class="text-sm text-gray-500">View payment status by class</p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Exam Management -->
+            <a href="{{ url_for('admin_routes.manage_exams') }}"
+               class="bg-white rounded-xl card-shadow p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:bg-red-50 group">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-red-100 text-red-500 group-hover:bg-red-200">
+                        <i class="fas fa-file-upload text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="font-semibold text-gray-800">Manage Exams</h3>
+                        <p class="text-sm text-gray-500">Print & download teacher exams</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <script>
+            const classCtx = document.getElementById('classDistributionChart');
+            if (classCtx) {
+                new Chart(classCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: [
+                            "ADVANCE SIGN LANGUAGE", "ADVANCED SIGN LANGUAGE", "ADVANCED SIGN LANGUAGE",
+                            "AI TOOLS", "AI TOOLS FOR WEB DESIGN", "BARBERING",
+                            "BASIC REFRIGERATION", "CAREGIVER", "COMPUTER", "COMPUTER ",
+                            "DANCE", "DIGITAL MARKETING", "DIGITAL MARKETING ", "ENGLISH LANGUAGE",
+                            "ENTREPRENEURSHIP", "FIRST AID", "FOOD AND BEVERAGE", "FOOD AND BEVERAGE ",
+                            "FOOTBALL", "FRENCH", "GERMANY", "HAIR AND BEAUTY",
+                            "MINDSET", "MINDSET EDUCATION", "MUSIC", "PROGRAMING",
+                            "PROGRAMMING", "SALES AND MARKETING", "SIGN LANGUAGE",
+                            "SIGN LANGUAGE", "SIGN LANGUAGE-ADVANCE", "SMART AGRICULTURE",
+                            "SMART AGRICULTURE ", "TAE KWON DO", "TAEKWONDO",
+                            "THEOLOGY", "VIDEOGRAPHY", "WEB DESIGN"
+                        ],
+                        datasets: [{
+                            label: 'Students',
+                            data: [
+                                1, 9, 13, 2, 16, 1, 21, 2, 97, 65, 4, 4, 12, 11, 6,
+                                12, 11, 22, 2, 11, 1, 248, 1, 7, 11, 1, 17, 14, 24,
+                                43, 2, 4, 5, 6, 7, 12, 23, 1
+                            ],
+                            backgroundColor: [
+                                '#2563eb',
+                                '#3b82f6',
+                                '#60a5fa',
+                                '#93c5fd',
+                                '#bfdbfe'
+                            ],
+                            borderColor: '#1e40af',
+                            borderWidth: 2,
+                            borderRadius: 4,
+                            borderSkipped: false,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 20,
+                                    usePointStyle: true,
+                                    font: {
+                                        size: 12
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Student Distribution by Course',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed !== null) {
+                                            label += context.parsed + ' students';
+                                            const total = [
+                                                1, 9, 13, 2, 16, 1, 21, 2, 97, 65, 4, 4, 12, 11, 6,
+                                                12, 11, 22, 2, 11, 1, 248, 1, 7, 11, 1, 17, 14, 24,
+                                                43, 2, 4, 5, 6, 7, 12, 23, 1
+                                            ].reduce((a, b) => a + b, 0);
+                                            const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                            label += ` (${percentage}%)`;
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(168, 181, 195, 0.2)'
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 12
+                                    },
+                                    callback: function(value) {
+                                        return value + ' students';
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 12
+                                    },
+                                    autoSkip: true,
+                                    maxRotation: 45,
+                                    minRotation: 0
+                                }
+                            }
+                        },
+                        animation: {
+                            duration: 500,
+                            easing: 'linear'
+                        }
+                    }
+                });
+            }
+        </script>
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+
+{% block title %}Add Exam Result - {{ student.name }}{% endblock %}
+
+{% block header %}Add Exam Result{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <!-- Hero Header -->
+  <div class="text-center mb-12">
+    <div class="bg-gradient-to-r from-purple-500 via-indigo-500 to-blue-600 rounded-3xl shadow-2xl p-8 md:p-12 backdrop-blur-sm">
+      <div class="w-24 h-24 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl">
+        <i class="fas fa-chart-line text-3xl text-white"></i>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">Record Exam Result</h1>
+      <p class="text-xl text-white/90 max-w-lg mx-auto">
+        Enter {{ student.name }}'s performance for subject assessment and grading
+      </p>
+    </div>
+  </div>
+
+  <!-- Student Info Card -->
+  <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 mb-12 overflow-hidden">
+    <div class="p-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+        <div class="md:col-span-2">
+          <div class="flex items-center space-x-4 mb-4">
+            <div class="w-16 h-16 bg-gradient-to-r from-primary to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <i class="fas fa-user-graduate text-2xl text-white"></i>
+            </div>
+            <div>
+              <h2 class="text-2xl font-bold text-gray-900">{{ student.name }}</h2>
+              <p class="text-lg text-gray-600">ID: {{ student.id }} · {{ student.class_name }} · {{ student.session }}</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+            <div class="text-center p-4 bg-gray-50 rounded-xl">
+              <div class="text-2xl font-bold text-primary">{{ student.phone }}</div>
+              <p class="text-gray-500">Phone</p>
+            </div>
+            {% if student.next_of_kin_phone %}
+            <div class="text-center p-4 bg-emerald-50 rounded-xl">
+              <div class="text-2xl font-bold text-emerald-600">{{ student.next_of_kin_phone }}</div>
+              <p class="text-emerald-700 font-medium">Emergency Contact</p>
+            </div>
+            {% endif %}
+            <div class="text-center p-4 bg-blue-50 rounded-xl">
+              <div class="text-2xl font-bold text-blue-600">{{ student.admission_number or 'N/A' }}</div>
+              <p class="text-blue-700 font-medium">Admission #</p>
+            </div>
+          </div>
+        </div>
+        <div class="text-center md:text-right">
+          <a href="{{ url_for('view_student', student_id=student.id) }}" 
+             class="inline-flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 
+                    text-gray-800 font-semibold rounded-xl transition-all duration-300 
+                    shadow-sm hover:shadow-md hover:-translate-y-0.5">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Profile
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Form -->
+  <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
+    <div class="px-8 py-6 bg-gradient-to-r from-indigo-50 to-blue-50 border-b border-indigo-100">
+      <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+        <i class="fas fa-edit text-primary mr-3"></i>Exam Result Details
+      </h2>
+    </div>
+    
+    <div class="p-8">
+      <form method="POST" class="space-y-8" id="examForm">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- Subject -->
+          <div>
+            <label for="exam_type" class="block text-sm font-bold text-gray-700 mb-4 flex items-center">
+              <i class="fas fa-book text-indigo-500 mr-2"></i>Subject <span class="text-red-500">*</span>
+            </label>
+            <input type="text" 
+                   id="exam_type" 
+                   name="exam_type" 
+                   required
+                   class="w-full px-5 py-4 border border-gray-200 rounded-2xl bg-white/50 
+                          focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 
+                          transition-all duration-300 shadow-lg hover:shadow-xl text-lg 
+                          placeholder-gray-500 focus:outline-none"
+                   placeholder="e.g., Mathematics, English Literature, Kiswahili">
+          </div>
+
+          <!-- Marks Grid -->
+          <div class="space-y-6">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Marks Obtained <span class="text-red-500">*</span></label>
+                <input type="number" 
+                       step="0.01" 
+                       min="0" 
+                       id="marks_obtained" 
+                       name="marks_obtained" 
+                       required
+                       class="w-full px-4 py-3 border border-gray-200 rounded-xl 
+                              focus:ring-4 focus:ring-green-200 focus:border-green-500 
+                              transition-all duration-300 shadow-sm">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Total Marks <span class="text-red-500">*</span></label>
+                <input type="number" 
+                       step="0.01" 
+                       min="1" 
+                       id="total_marks" 
+                       name="total_marks" 
+                       required
+                       class="w-full px-4 py-3 border border-gray-200 rounded-xl 
+                              focus:ring-4 focus:ring-blue-200 focus:border-blue-500 
+                              transition-all duration-300 shadow-sm">
+              </div>
+            </div>
+            <!-- Auto-calculated Grade -->
+            <div class="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-2xl">
+              <label class="block text-sm font-bold text-yellow-900 mb-2 flex items-center">
+                <i class="fas fa-star text-yellow-500 mr-2"></i>Grade & Percentage
+              </label>
+              <div class="text-center space-y-2">
+                <div id="grade_display" class="text-3xl font-bold text-gray-900 bg-white px-6 py-3 rounded-xl shadow-md">
+                  Enter marks to calculate
+                </div>
+                <div id="percentage_display" class="text-lg text-gray-600 font-mono">0%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Remarks -->
+        <div>
+          <label for="remarks" class="block text-sm font-bold text-gray-700 mb-4 flex items-center">
+            <i class="fas fa-comment-dots text-purple-500 mr-2"></i>Teacher Remarks
+          </label>
+          <textarea id="remarks" 
+                    name="remarks" 
+                    rows="4"
+                    class="w-full px-5 py-4 border border-gray-200 rounded-2xl bg-white/50 
+                           focus:ring-4 focus:ring-purple-200 focus:border-purple-500 
+                           transition-all duration-300 shadow-lg resize-vertical 
+                           placeholder-gray-500 text-lg focus:outline-none"
+                    placeholder="Enter teacher comments, strengths, areas for improvement..."></textarea>
+          <p class="mt-2 text-sm text-gray-500 flex items-center">
+            <i class="fas fa-info-circle mr-2"></i>Optional but recommended for student feedback
+          </p>
+        </div>
+
+        <!-- Grading Legend -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-gradient-to-r from-gray-50 to-blue-50 rounded-3xl border-2 border-gray-200">
+          <div>
+            <h4 class="font-bold text-lg text-gray-900 mb-3 flex items-center">
+              <i class="fas fa-star text-yellow-500 mr-2"></i>Grade Scale
+            </h4>
+            <div class="space-y-1 text-sm">
+              <div><span class="font-semibold text-green-600">A</span> 90-100% Excellent</div>
+              <div><span class="font-semibold text-blue-600">B</span> 75-89% Very Good</div>
+              <div><span class="font-semibold text-indigo-600">C</span> 60-74% Good</div>
+              <div><span class="font-semibold text-orange-600">D</span> 45-59% Satisfactory</div>
+              <div><span class="font-semibold text-yellow-600">E</span> 30-44% Needs Improvement</div>
+              <div><span class="font-semibold text-red-600">F</span> 0-29% Fail</div>
+            </div>
+          </div>
+          
+          <div class="md:col-span-2 text-center">
+            <div class="text-4xl font-bold text-gray-900 mb-2" id="live_grade">-</div>
+            <div class="text-xl text-gray-600 mb-4" id="live_percentage">0.0%</div>
+            <p class="text-sm text-gray-500 font-medium" id="live_remarks">Enter marks above to see live grade</p>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 pt-8 border-t border-gray-100">
+          <a href="{{ url_for('view_student', student_id=student.id) }}" 
+             class="flex-1 sm:w-auto inline-flex items-center justify-center px-10 py-4 
+                    border-2 border-gray-300 text-lg font-semibold rounded-2xl text-gray-700 
+                    bg-white hover:bg-gray-50 hover:border-gray-400 
+                    focus:ring-4 focus:ring-gray-200 transition-all duration-300 
+                    shadow-sm hover:shadow-md hover:-translate-y-0.5">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Student
+          </a>
+          
+          <button type="submit" 
+                  class="flex-1 sm:w-auto px-14 py-4 bg-gradient-to-r from-primary to-indigo-600 
+                         hover:from-primary/90 hover:to-indigo-600/90 text-white text-lg font-bold 
+                         rounded-2xl shadow-2xl hover:shadow-3xl focus:ring-4 focus:ring-primary/30 
+                         transition-all duration-300 hover:-translate-y-1">
+            <i class="fas fa-save mr-2"></i>Save Exam Result
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const marksObtained = document.getElementById('marks_obtained');
+  const totalMarks = document.getElementById('total_marks');
+  const gradeDisplay = document.getElementById('grade_display');
+  const percentageDisplay = document.getElementById('percentage_display');
+  const liveGrade = document.getElementById('live_grade');
+  const livePercentage = document.getElementById('live_percentage');
+  const liveRemarks = document.getElementById('live_remarks');
+
+  function calculateGrade() {
+    const obtained = parseFloat(marksObtained.value) || 0;
+    const total = parseFloat(totalMarks.value) || 100;
+    
+    if (obtained > 0 && total > 0) {
+      const percentage = Math.min(100, Math.max(0, (obtained / total) * 100));
+      
+      let grade, remarks, color;
+      if (percentage >= 90) { grade = 'A'; remarks = 'Excellent'; color = 'text-green-600'; }
+      else if (percentage >= 75) { grade = 'B'; remarks = 'Very Good'; color = 'text-blue-600'; }
+      else if (percentage >= 60) { grade = 'C'; remarks = 'Good'; color = 'text-indigo-600'; }
+      else if (percentage >= 45) { grade = 'D'; remarks = 'Satisfactory'; color = 'text-orange-600'; }
+      else if (percentage >= 30) { grade = 'E'; remarks = 'Needs Improvement'; color = 'text-yellow-600'; }
+      else { grade = 'F'; remarks = 'Fail'; color = 'text-red-600'; }
+      
+      // Update displays
+      gradeDisplay.textContent = `${obtained.toFixed(1)} / ${total.toFixed(1)}`;
+      percentageDisplay.textContent = `${percentage.toFixed(1)}%`;
+      
+      liveGrade.textContent = grade;
+      liveGrade.className = `text-4xl font-bold mb-2 ${color}`;
+      livePercentage.textContent = `${percentage.toFixed(1)}%`;
+      liveRemarks.textContent = remarks;
+      liveRemarks.className = `text-sm font-medium ${color}`;
+      
+      // Color code the percentage background
+      const percentBg = percentage >= 75 ? 'bg-green-100' : percentage >= 60 ? 'bg-blue-100' : 
+                       percentage >= 45 ? 'bg-yellow-100' : 'bg-red-100';
+      gradeDisplay.className = `text-3xl font-bold text-gray-900 bg-white px-6 py-3 rounded-xl shadow-md ${percentBg}`;
+    } else {
+      gradeDisplay.textContent = 'Enter marks to calculate';
+      percentageDisplay.textContent = '0%';
+      liveGrade.textContent = '-';
+      livePercentage.textContent = '0.0%';
+      liveRemarks.textContent = 'Enter marks above to see live grade';
+    }
+  }
+
+  // Event listeners
+  marksObtained.addEventListener('input', calculateGrade);
+  totalMarks.addEventListener('input', calculateGrade);
+
+  // Form validation
+  document.getElementById('examForm').addEventListener('submit', function(e) {
+    const obtained = parseFloat(marksObtained.value);
+    const total = parseFloat(totalMarks.value);
+    
+    if (obtained > total) {
+      e.preventDefault();
+      alert('Marks obtained cannot exceed total marks');
+      return false;
+    }
+    
+    if (!marksObtained.value || !totalMarks.value) {
+      e.preventDefault();
+      alert('Please enter both marks obtained and total marks');
+      return false;
+    }
+  });
+});
+</script>
+
+{% endblock %}
+

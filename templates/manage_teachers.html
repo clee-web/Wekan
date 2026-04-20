@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Teachers - Wekan Academy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#1e40af',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                        info: '#3b82f6'
+                    },
+                    animation: {
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                    },
+                    keyframes: {
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        }
+        .btn-shimmer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn-shimmer:hover::before {
+            left: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="gradient-bg rounded-2xl shadow-lg p-8 animate-slide-up">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="text-center md:text-left mb-4 md:mb-0">
+                        <h1 class="text-4xl font-bold text-white mb-2 flex items-center justify-center md:justify-start">
+                            <i class="fas fa-users-cog mr-3"></i>
+                            Manage Teachers
+                        </h1>
+                        <p class="text-blue-100 text-lg">View, edit, delete, and manage teacher accounts</p>
+                    </div>
+                    <div class="text-center md:text-right space-x-4">
+                        <a href="{{ url_for('admin_routes.add_teacher') }}" 
+                           class="inline-flex items-center px-6 py-3 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-all duration-300 shadow-sm hover:shadow-md">
+                            <i class="fas fa-user-plus mr-2"></i>
+                            Add New Teacher
+                        </a>
+                        <a href="{{ url_for('main.index') }}" 
+                           class="inline-flex items-center px-6 py-3 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-all duration-300 shadow-sm hover:shadow-md">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-6 animate-fade-in hover:shadow-xl transition-shadow duration-300">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Total Teachers</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ teachers|length }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
+                        <i class="fas fa-users text-white"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 animate-fade-in hover:shadow-xl transition-shadow duration-300">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Active Teachers</p>
+<p class="text-2xl font-bold text-success">{{ active_count }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-success rounded-full flex items-center justify-center">
+                        <i class="fas fa-user-check text-white"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 animate-fade-in hover:shadow-xl transition-shadow duration-300">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Inactive Teachers</p>
+<p class="text-2xl font-bold text-warning">{{ inactive_count }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-warning rounded-full flex items-center justify-center">
+                        <i class="fas fa-user-times text-white"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 animate-fade-in hover:shadow-xl transition-shadow duration-300">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">New This Month</p>
+<p class="text-2xl font-bold text-info">{{ new_this_month }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-info rounded-full flex items-center justify-center">
+                        <i class="fas fa-calendar-plus text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teachers Table -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden animate-fade-in">
+            <div class="bg-white border-b border-gray-200 px-8 py-6">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-list text-primary mr-3"></i>
+                        All Teachers
+                    </h2>
+                    <div class="mt-4 md:mt-0">
+                        <div class="relative">
+                            <input type="text" 
+                                   id="searchInput" 
+                                   placeholder="Search teachers..." 
+                                   class="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200">
+                            <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for teacher in teachers %}
+                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fas fa-user text-gray-600"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">{{ teacher.first_name }} {{ teacher.last_name }}</div>
+                                        <div class="text-xs text-gray-500">{{ teacher.qualification }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ teacher.email }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ teacher.phone }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    {{ teacher.subject }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if teacher.class_name %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                        {{ teacher.class_name }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-gray-400 text-xs">Not assigned</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if teacher.active %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        Active
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        <i class="fas fa-times-circle mr-1"></i>
+                                        Inactive
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex items-center space-x-2">
+                                    <!-- Send Credentials -->
+                                    <form method="POST" action="{{ url_for('admin_routes.send_teacher_credentials', teacher_id=teacher.id) }}" class="inline">
+                                        <button type="submit" 
+                                                class="inline-flex items-center px-3 py-1.5 bg-info text-white text-xs font-medium rounded hover:bg-blue-600 transition-colors duration-200"
+                                                title="Send login credentials">
+                                            <i class="fas fa-envelope"></i>
+                                        </button>
+                                    </form>
+                                    
+                                    <!-- Toggle Status -->
+                                    <form method="POST" action="{{ url_for('admin_routes.toggle_teacher_status', teacher_id=teacher.id) }}" class="inline">
+                                        <button type="submit" 
+                                                class="inline-flex items-center px-3 py-1.5 {% if teacher.active %}bg-warning text-white{% else %}bg-success text-white{% endif %} text-xs font-medium rounded hover:opacity-80 transition-opacity duration-200"
+                                                title="{% if teacher.active %}Deactivate teacher{% else %}Activate teacher{% endif %}">
+                                            <i class="fas {% if teacher.active %}fa-user-times{% else %}fa-user-check{% endif %}"></i>
+                                        </button>
+                                    </form>
+                                    
+                                    <!-- Delete -->
+                                    <form method="POST" action="{{ url_for('admin_routes.delete_teacher', teacher_id=teacher.id) }}" class="inline"
+                                          onsubmit="return confirm('Are you sure you want to delete this teacher? This action cannot be undone.')">
+                                        <button type="submit" 
+                                                class="inline-flex items-center px-3 py-1.5 bg-danger text-white text-xs font-medium rounded hover:bg-red-600 transition-colors duration-200"
+                                                title="Delete teacher">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="px-6 py-12 text-center">
+                                <div class="text-center">
+                                    <i class="fas fa-users-slash fa-3x text-gray-400 mb-4"></i>
+                                    <p class="text-lg text-gray-600 font-medium">No teachers found</p>
+                                    <p class="text-sm text-gray-500 mt-2">Get started by adding your first teacher account.</p>
+                                    <a href="{{ url_for('admin_routes.add_teacher') }}" 
+                                       class="inline-flex items-center px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-secondary transition-colors duration-200">
+                                        <i class="fas fa-user-plus mr-2"></i>
+                                        Add First Teacher
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="fixed top-4 right-4 z-50 max-w-sm">
+                    {% if category == 'error' %}
+                        <div class="bg-white rounded-lg shadow-xl border-l-4 border-red-500 p-4 animate-slide-up">
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-gray-900">Error!</h4>
+                                    <p class="text-sm text-gray-600">{{ message }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="bg-white rounded-lg shadow-xl border-l-4 border-green-500 p-4 animate-slide-up">
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-gray-900">Success!</h4>
+                                    <p class="text-sm text-gray-600">{{ message }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <script>
+        // Search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const rows = document.querySelectorAll('tbody tr');
+            
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

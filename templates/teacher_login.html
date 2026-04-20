@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Login - Wekan Academy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#1e40af',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                        info: '#3b82f6'
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'float-reverse': 'float 8s ease-in-out infinite reverse',
+                        'pulse-slow': 'pulse 3s ease-in-out infinite',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'shake': 'shake 0.5s ease-in-out',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' }
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        shake: {
+                            '0%, 100%': { transform: 'translateX(0)' },
+                            '25%': { transform: 'translateX(-5px)' },
+                            '75%': { transform: 'translateX(5px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        }
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .floating-shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        .input-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            z-index: 10;
+        }
+        .btn-shimmer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn-shimmer:hover::before {
+            left: 100%;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen relative overflow-hidden">
+    <!-- Floating Background Shapes -->
+    <div class="floating-shape w-48 h-48 top-10 left-5 animate-float"></div>
+    <div class="floating-shape w-36 h-36 top-1/2 right-10 animate-float-reverse"></div>
+    <div class="floating-shape w-24 h-24 bottom-20 left-1/4 animate-float"></div>
+    
+    <!-- Login Container -->
+    <div class="min-h-screen flex items-center justify-center relative z-10">
+        <div class="w-full max-w-md mx-4">
+            <!-- Login Card -->
+            <div class="glass-effect rounded-2xl shadow-2xl p-8 animate-slide-up">
+                <!-- Logo and Header -->
+                <div class="text-center mb-8">
+                    <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg animate-pulse-slow">
+                        <i class="fas fa-chalkboard-teacher text-white text-3xl"></i>
+                    </div>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Teacher Portal</h1>
+                    <p class="text-gray-600">Welcome back! Sign in to access your dashboard</p>
+                </div>
+
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 animate-shake">
+                                <div class="flex items-center">
+                                    <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+                                    <div>
+                                        <h3 class="text-sm font-medium text-red-800">Login Error</h3>
+                                        <p class="text-sm text-red-700 mt-1">{{ message }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Login Form -->
+                <form method="POST" action="{{ url_for('teacher_routes.teacher_login') }}" class="space-y-6">
+                    <!-- Username Field -->
+                    <div class="relative">
+                        <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-user mr-2 text-primary"></i>Username
+                        </label>
+                        <div class="relative">
+                            <i class="fas fa-user input-icon"></i>
+                            <input type="text" 
+                                   id="username" 
+                                   name="username" 
+                                   class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-white"
+                                   placeholder="Enter your username" 
+                                   required>
+                        </div>
+                    </div>
+                    
+                    <!-- Password Field -->
+                    <div class="relative">
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-lock mr-2 text-primary"></i>Password
+                        </label>
+                        <div class="relative">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" 
+                                   id="password" 
+                                   name="password" 
+                                   class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-white"
+                                   placeholder="Enter your password" 
+                                   required>
+                        </div>
+                    </div>
+
+                    <!-- Remember Me -->
+                    <div class="flex items-center">
+                        <input type="checkbox" 
+                               id="remember" 
+                               name="remember" 
+                               class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
+                        <label for="remember" class="ml-2 text-sm text-gray-600">
+                            Remember me for 30 days
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="pt-2">
+                        <button type="submit" 
+                                class="w-full bg-primary text-white py-3 px-4 rounded-lg font-semibold hover:bg-secondary transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg relative overflow-hidden btn-shimmer">
+                            <i class="fas fa-sign-in-alt mr-2"></i>
+                            Sign In to Teacher Portal
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Divider -->
+                <div class="relative my-8">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-4 bg-white text-gray-500">or continue with</span>
+                    </div>
+                </div>
+
+                <!-- Quick Access -->
+                <div class="flex justify-center space-x-4">
+                    <a href="/admin/login" 
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+                        <i class="fas fa-user-shield mr-2"></i>
+                        Admin Login
+                    </a>
+                    <a href="#" 
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+                        <i class="fas fa-question-circle mr-2"></i>
+                        Get Help
+                    </a>
+                </div>
+
+                <!-- Forgot Password -->
+                <div class="text-center mt-6">
+                    <button onclick="showForgotPassword()" class="text-sm text-primary hover:text-secondary transition-colors duration-200 font-medium">
+                        <i class="fas fa-key mr-2"></i>
+                        Forgot Password?
+                    </button>
+                </div>
+
+                <!-- Footer Links -->
+                <div class="flex justify-center space-x-6 mt-8">
+                    <a href="#" class="text-sm text-gray-500 hover:text-primary transition-colors duration-200">
+                        <i class="fas fa-shield-alt mr-1"></i>
+                        Privacy Policy
+                    </a>
+                    <a href="#" class="text-sm text-gray-500 hover:text-primary transition-colors duration-200">
+                        <i class="fas fa-file-contract mr-1"></i>
+                        Terms of Service
+                    </a>
+                </div>
+
+                <!-- Security Badge -->
+                <div class="text-center mt-6">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        <i class="fas fa-lock mr-1"></i>
+                        Secure Connection
+                    </span>
+                </div>
+            </div>
+
+            <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 transform transition-all">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">
+                        <i class="fas fa-key text-primary mr-2"></i>
+                        Reset Password
+                    </h3>
+                    <button onclick="hideForgotPassword()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form method="POST" action="/teacher/forgot_password" class="space-y-4">
+                    <div>
+                        <label for="reset_email" class="block text-sm font-medium text-gray-700 mb-2">
+                            Email Address
+                        </label>
+                        <input type="email" 
+                               id="reset_email" 
+                               name="email" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                               placeholder="Enter your email address" 
+                               required>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" 
+                                class="inline-flex items-center px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-secondary transition-colors duration-200">
+                            <i class="fas fa-paper-plane mr-2"></i>
+                            Send Reset Link
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+            <div class="text-center mt-8">
+                <p class="text-white text-sm opacity-75">
+                    <i class="fas fa-shield-alt mr-1"></i>
+                    Secure login powered by Wekan Academy
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add interactive enhancements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Form field focus effects
+            const inputs = document.querySelectorAll('input[type="text"], input[type="password"]');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('transform', 'scale-105');
+                });
+                input.addEventListener('blur', function() {
+                    this.parentElement.classList.remove('transform', 'scale-105');
+                });
+            });
+
+            // Button click effect
+            const submitBtn = document.querySelector('button[type="submit"]');
+            submitBtn.addEventListener('click', function() {
+                this.classList.add('scale-95');
+                setTimeout(() => {
+                    this.classList.remove('scale-95');
+                }, 100);
+            });
+        });
+
+        function showForgotPassword() {
+            document.getElementById('forgotPasswordModal').classList.remove('hidden');
+        }
+
+        function hideForgotPassword() {
+            document.getElementById('forgotPasswordModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

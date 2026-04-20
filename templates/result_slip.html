@@ -1,0 +1,398 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-light: #3b82f6;
+        --primary-dark: #1d4ed8;
+        --success: #059669;
+        --danger: #dc2626;
+        --gray: #6b7280;
+        --gray-dark: #4b5563;
+    }
+
+    @media print {
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        /* Reset body and container styles */
+        body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            width: 100% !important;
+        }
+
+        /* Ensure the result slip takes full width */
+        .max-w-5xl {
+            max-width: none !important;
+            width: 100% !important;
+            padding: 2cm !important;
+            margin: 0 !important;
+        }
+
+        /* Clean up the container */
+        .bg-white {
+            background: white !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Ensure tables print properly */
+        .result-table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            page-break-inside: avoid !important;
+        }
+
+        .result-table th,
+        .result-table td {
+            padding: 8px !important;
+            border: 1px solid #ddd !important;
+            text-align: left !important;
+        }
+
+        /* Make the grid layout print properly */
+        .grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 1rem !important;
+            margin-bottom: 2rem !important;
+        }
+
+        /* Style info cards for print */
+        .info-card {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+            padding: 1rem !important;
+            break-inside: avoid !important;
+        }
+
+        /* Ensure grade badges print with colors */
+        .grade-badge {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            padding: 0.25rem 0.75rem !important;
+            border-radius: 9999px !important;
+            display: inline-block !important;
+        }
+
+        /* Hide non-printable elements */
+        .no-print {
+            display: none !important;
+        }
+
+        /* Ensure images print */
+        img {
+            display: block !important;
+            max-width: 100% !important;
+            height: auto !important;
+        }
+
+        /* Logo sizing */
+        .w-48 {
+            width: 12rem !important;
+            height: 12rem !important;
+        }
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+    }
+
+    .btn-primary {
+        background: linear-gradient(to right, var(--primary), var(--primary-dark));
+        color: white;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: var(--gray-dark);
+        border: 1px solid #e5e7eb;
+    }
+
+    .btn-secondary:hover {
+        background: #f9fafb;
+        border-color: #d1d5db;
+    }
+
+    .info-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+    }
+
+    .result-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .result-table th {
+        background: #f8fafc;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 500;
+        color: var(--gray-dark);
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .result-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        color: var(--gray-dark);
+    }
+
+    .result-table tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .grade-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-weight: 500;
+        font-size: 0.875rem;
+    }
+
+    .grade-a {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .grade-b {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .grade-c {
+        background: #fef9c3;
+        color: #854d0e;
+    }
+
+    .grade-d {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .grade-f {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+</style>
+{% endblock %}
+
+{% block title %}Result Slip - {{ student.name }}{% endblock %}
+
+{% block header %}Result Slip{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8 university-transcript-border" style="background: #fff; border: 8px double #1d3557; padding: 2.5rem; font-family: 'Georgia', 'Times New Roman', Times, serif;">
+    <style>
+        .university-transcript-border {
+            box-shadow: 0 0 0 8px #fff, 0 0 0 12px #1d3557;
+            border-radius: 18px;
+        }
+        .university-title {
+            font-size: 2.5rem;
+            font-family: 'Georgia', 'Times New Roman', Times, serif;
+            font-weight: bold;
+            color: #1d3557;
+            letter-spacing: 2px;
+        }
+        .university-subtitle {
+            font-size: 1.25rem;
+            color: #457b9d;
+            margin-bottom: 1.5rem;
+            letter-spacing: 1px;
+        }
+        .transcript-table th, .transcript-table td {
+            font-size: 1.1rem;
+            font-family: 'Georgia', 'Times New Roman', Times, serif;
+        }
+        .signature-section {
+            margin-top: 3rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signature-line {
+            border-bottom: 1.5px solid #1d3557;
+            width: 250px;
+            margin-bottom: 0.25rem;
+        }
+        .signature-label {
+            font-size: 1rem;
+            color: #222;
+            text-align: center;
+        }
+        .official-stamp {
+            margin-top: 1.5rem;
+            text-align: right;
+        }
+        @media print {
+            .university-transcript-border { box-shadow: none !important; border-width: 8px !important; }
+        }
+    </style>
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden print-shadow-none">
+        <div class="p-6">
+            <!-- School Header -->
+            <div class="text-center mb-8">
+    <div class="w-48 h-48 mx-auto mb-4">
+        <img src="{{ url_for('static', filename='images/freewa-8.png') }}" alt="IYF Logo" class="w-full h-full object-contain">
+    </div>
+    <div class="university-title">INTERNATIONAL YOUTH FELLOWSHIP</div>
+    <div class="university-subtitle">Official Academic Transcript</div>
+    <div class="mt-2" style="font-size:1.15rem;color:#333;">Student Result Slip</div>
+</div>
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                        <i class="fas fa-user-graduate text-2xl text-primary"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold text-gray-900">{{ student.name }}</h3>
+                        <p class="text-sm text-gray-500">Student ID: {{ student.id }}</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-gray-500">Date Issued</p>
+                    <p class="font-medium text-gray-900">{{ current_date.strftime('%B %d, %Y') }}</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="info-card">
+                    <p class="text-sm text-gray-500 mb-1">Class</p>
+                    <p class="font-medium text-gray-900">{{ student.class_name }}</p>
+                </div>
+                <div class="info-card">
+                    <p class="text-sm text-gray-500 mb-1">Session</p>
+                    <p class="font-medium text-gray-900">{{ student.session }}</p>
+                </div>
+                <div class="info-card">
+                    <p class="text-sm text-gray-500 mb-1">Overall Average</p>
+                    <p class="font-medium text-gray-900">{{ "%.1f"|format(overall_average) }}%</p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="result-table transcript-table" style="border:2px solid #1d3557;">
+                    <thead>
+                        <tr>
+                            <th>Exam Type</th>
+                            <th class="text-center">Marks</th>
+                            <th class="text-center">Percentage</th>
+                            <th class="text-center">Grade</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in exam_results %}
+                        <tr>
+                            <td class="font-medium">
+                                {% if result.exam_type == 'class_midterm' %}
+                                    Class Mid Term
+                                {% elif result.exam_type == 'leadership_midterm' %}
+                                    Leadership Mid Term
+                                {% elif result.exam_type == 'class_final' %}
+                                    Class Final Exam
+                                {% elif result.exam_type == 'leadership_final' %}
+                                    Leadership Final Exam
+                                {% else %}
+                                    {{ result.exam_type }}
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {{ result.marks_obtained }}/{{ result.total_marks }}
+                            </td>
+                            <td class="text-center">
+                                {{ "%.1f"|format((result.marks_obtained / result.total_marks) * 100) }}%
+                            </td>
+                            <td class="text-center">
+                                <span class="grade-badge {% if result.grade in ['A+', 'A', 'A-'] %}grade-a
+                                                        {% elif result.grade in ['B+', 'B', 'B-'] %}grade-b
+                                                        {% elif result.grade in ['C+', 'C', 'C-'] %}grade-c
+                                                        {% elif result.grade in ['D+', 'D', 'D-'] %}grade-d
+                                                        {% else %}grade-f{% endif %}">
+                                    {{ result.grade }}
+                                </span>
+                            </td>
+                            <td>{{ result.remarks }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Official Stamp -->
+            <div class="official-stamp">
+                <img src="{{ url_for('static', filename='images/stamp.jpg') }}" alt="IYF Stamp" style="width:120px;height:120px;opacity:0.6;float:right;">
+            </div>
+            <div class="signature-section">
+                <div>
+                    <div class="signature-line"></div>
+                    <div class="signature-label">Registrar's Signature</div>
+                </div>
+                <div>
+                    <div class="signature-line"></div>
+                    <div class="signature-label">Dean/Principal</div>
+                </div>
+            </div>
+
+            <!-- Student QR Code -->
+            <div class="text-center mt-8 mb-8">
+                <h3 class="text-lg font-semibold mb-4 text-gray-800">Student Verification QR</h3>
+                <div class="qr-container mx-auto bg-white p-4 rounded-lg shadow-md border inline-block">
+                    <img src="/generate_qr/student/{{ student.id }}" 
+                         alt="Student QR Code" 
+                         class="w-32 h-32 mx-auto block object-contain">
+                    <p class="text-xs text-gray-500 mt-2">Scan to verify transcript</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-4 mt-8 no-print">
+    <button onclick="window.print()" class="btn btn-primary">
+        <i class="fas fa-print mr-2"></i>Print Result Slip
+    </button>
+    <button id="download-pdf" class="btn btn-primary">
+        <i class="fas fa-file-download mr-2"></i>Download as PDF
+    </button>
+    <a href="{{ url_for('view_student', student_id=student.id) }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left mr-2"></i>Back to Student
+    </a>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+document.getElementById('download-pdf').addEventListener('click', function () {
+    var element = document.querySelector('.max-w-5xl');
+    var opt = {
+        margin:       0.5,
+        filename:     'transcript_{{ student.id }}.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
+});
+</script>
+        </div>
+    </div>
+</div>
+{% endblock %}

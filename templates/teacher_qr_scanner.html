@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="text-center mb-0">
+                        <i class="fas fa-qrcode"></i> QR Attendance Scanner
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <p class="text-muted">Scan student QR codes to automatically mark attendance</p>
+                        <p class="small text-info">
+                            <strong>Supported QR formats:</strong><br>
+                            - student_name:student_id<br>
+                            - IYF-Student:student_id-student_name
+                        </p>
+                    </div>
+                    
+                    <!-- QR Scanner Area -->
+                    <div class="mb-4">
+                        <div id="qr-reader" style="width: 100%; height: 300px; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa;">
+                            <div class="text-center">
+                                <i class="fas fa-camera fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">Click "Start Camera" to begin scanning</p>
+                                <button id="start-camera" class="btn btn-primary">Start Camera</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Manual Input (fallback) -->
+                    <div class="card bg-light">
+                        <div class="card-header">
+                            <h6 class="mb-0">Manual QR Code Entry (if camera doesn't work)</h6>
+                        </div>
+                        <div class="card-body">
+                            <form id="manual-qr-form">
+                                <div class="mb-3">
+                                    <label for="qr-data" class="form-label">Enter QR Code Data:</label>
+                                    <input type="text" class="form-control" id="qr-data" 
+                                           placeholder="e.g., John Doe:123 or IYF-Student:123-John Doe" 
+                                           required>
+                                    <small class="form-text text-muted">Enter the exact content of the QR code</small>
+                                </div>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-check"></i> Mark Attendance
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Result Display -->
+                    <div id="result" class="mt-4" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Scan Result</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="result-content"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Scans -->
+                    <div class="mt-4">
+                        <h6>Recent Scans Today</h6>
+                        <div id="recent-scans" class="list-group">
+                            <p class="text-muted">No scans yet today</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include HTML5 QR Code Scanner Library -->
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+<script>
+let html5QrCode = null;
+let isScanning = false;
+
+function onScanSuccess(decodedText, decodedResult) {
+    console.log(`Scan result: ${decodedText}`);
+    stopScanning();
+    processQRData(decodedText);
+}
+
+function onScanFailure(error) {
+    // Handle scan failure, usually better to ignore it.
+    console.warn(`QR scan failed: ${error}`);
+}
+
+function startScanning() {
+    const qrReaderElement = document.getElementById('qr-reader');
+    
+    html5QrCode = new Html5Qrcode("qr-reader");
+    
+    Html5Qrcode.getCameras().then(devices => {
+        if (devices && devices.length) {
+            const cameraId = devices[0].id;
+            
+            html5QrCode.start(
+                cameraId, 
+                {
+                    fps: 10, 
+                    qrbox: {width: 250, height: 250}
+                },
+                onScanSuccess,
+                onScanFailure
+            ).then(() => {
+                isScanning = true;
+                document.getElementById('start-camera').style.display = 'none';
+                qrReaderElement.innerHTML = '<div class="text-center"><p><i class="fas fa-spinner fa-spin"></i> Camera active - Position QR code in frame</p></div>';
+            }).catch((err) => {
+                console.error(`Unable to start scanning: ${err}`);
+                alert('Camera access denied or not available. Use manual entry instead.');
+                showManualEntry();
+            });
+        }
+    }).catch(err => {
+        console.error(`Camera enumeration failed: ${err}`);
+        alert('No camera found. Use manual entry instead.');
+        showManualEntry();
+    });
+}
+
+function stopScanning() {
+    if (html5QrCode && isScanning) {
+        html5QrCode.stop().then(() => {
+            isScanning = false;
+            document.getElementById('start-camera').style.display = 'block';
+            document.getElementById('qr-reader').innerHTML = `
+                <div class="text-center">
+                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                    <p class="text-success">QR Code scanned successfully!</p>
+                    <button id="start-camera" class="btn btn-primary" onclick="startScanning()">Scan Another</button>
+                </div>
+            `;
+        }).catch((err) => {
+            console.error(`Failed to stop scanning: ${err}`);
+        });
+    }
+}
+
+function showManualEntry() {
+    document.getElementById('qr-reader').innerHTML = `
+        <div class="text-center">
+            <i class="fas fa-keyboard fa-3x text-muted mb-3"></i>
+            <p class="text-muted">Camera not available - use manual entry below</p>
+        </div>
+    `;
+}
+
+function processQRData(qrData) {
+    fetch('/teacher/scan_qr', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            qr_data: qrData
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        displayResult(data);
+        if (data.success) {
+            addToRecentScans(data.student);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        displayResult({error: 'Network error. Please try again.'});
+    });
+}
+
+function displayResult(data) {
+    const resultDiv = document.getElementById('result');
+    const resultContent = document.getElementById('result-content');
+    
+    resultDiv.style.display = 'block';
+    
+    if (data.success) {
+        resultContent.innerHTML = `
+            <div class="alert alert-success">
+                <h6><i class="fas fa-check-circle"></i> ${data.message}</h6>
+                <div class="mt-2">
+                    <strong>Student Details:</strong><br>
+                    Name: ${data.student.name}<br>
+                    ID: ${data.student.admission_number || 'N/A'}<br>
+                    Class: ${data.student.class_name || 'N/A'}<br>
+                    Phone: ${data.student.phone || 'N/A'}
+                </div>
+            </div>
+        `;
+    } else if (data.existing) {
+        resultContent.innerHTML = `
+            <div class="alert alert-info">
+                <h6><i class="fas fa-info-circle"></i> ${data.message}</h6>
+                <div class="mt-2">
+                    <strong>Student Details:</strong><br>
+                    Name: ${data.student.name}<br>
+                    ID: ${data.student.admission_number || 'N/A'}<br>
+                    Class: ${data.student.class_name || 'N/A'}
+                </div>
+            </div>
+        `;
+    } else {
+        resultContent.innerHTML = `
+            <div class="alert alert-danger">
+                <h6><i class="fas fa-exclamation-triangle"></i> Error</h6>
+                <p>${data.error}</p>
+            </div>
+        `;
+    }
+}
+
+function addToRecentScans(student) {
+    const recentScansDiv = document.getElementById('recent-scans');
+    const timestamp = new Date().toLocaleTimeString();
+    
+    // Remove "No scans yet" message if it exists
+    if (recentScansDiv.innerHTML.includes('No scans yet')) {
+        recentScansDiv.innerHTML = '';
+    }
+    
+    const scanItem = document.createElement('div');
+    scanItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+    scanItem.innerHTML = `
+        <div>
+            <strong>${student.name}</strong><br>
+            <small class="text-muted">${student.admission_number || 'N/A'} - ${student.class_name || 'N/A'}</small>
+        </div>
+        <span class="badge bg-success">${timestamp}</span>
+    `;
+    
+    recentScansDiv.insertBefore(scanItem, recentScansDiv.firstChild);
+    
+    // Keep only last 10 scans
+    while (recentScansDiv.children.length > 10) {
+        recentScansDiv.removeChild(recentScansDiv.lastChild);
+    }
+}
+
+// Event listeners
+document.getElementById('start-camera').addEventListener('click', startScanning);
+
+document.getElementById('manual-qr-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const qrData = document.getElementById('qr-data').value;
+    if (qrData.trim()) {
+        processQRData(qrData);
+        document.getElementById('qr-data').value = '';
+    }
+});
+</script>
+{% endblock %}

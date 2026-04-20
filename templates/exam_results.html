@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+
+{% block title %}Exam Results - IYF FREE WEEKEND ACADEMY{% endblock %}
+
+{% block header %}Exam Results{% endblock %}
+
+{% block extra_css %}
+<style>
+  .sidebar-hidden {
+    grid-template-columns: 1fr;
+  }
+  .gradient-bg {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    background-size: 200% 200%;
+    animation: gradientShift 8s ease infinite;
+  }
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .full-width-search {
+    max-width: none;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sidebar-hidden">
+  <div class="container mx-auto px-4 py-8 max-w-7xl">
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="gradient-bg rounded-2xl shadow-lg p-8 animate-slide-up">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="text-center md:text-left mb-4 md:mb-0">
+            <h1 class="text-4xl font-bold text-white mb-2 flex items-center justify-center md:justify-start">
+              <i class="fas fa-chart-line mr-3"></i>
+              Exam Results
+            </h1>
+            <p class="text-blue-100 text-lg">Manage student exam performance and grades</p>
+          </div>
+          <div class="text-center md:text-right">
+            <a href="{{ url_for('teacher_routes.teacher_dashboard') }}" class="inline-flex items-center px-6 py-3 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-all duration-300 shadow-sm hover:shadow-md">
+              <i class="fas fa-arrow-left mr-2"></i>
+              Back to Dashboard
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <!-- Add Exam Result Form -->
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden animate-fade-in block">
+      <div class="bg-gradient-to-r from-info to-blue-600 px-8 py-6">
+        <h2 class="text-2xl font-bold text-white flex items-center">
+          <i class="fas fa-plus-circle mr-3"></i>
+          Add Exam Result
+        </h2>
+      </div>
+      <div class="p-8">
+        <form id="addExamForm">
+          <div class="relative mb-6">
+            <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+              <i class="fas fa-user mr-2 text-primary"></i>Student
+            </label>
+            <input type="text" id="studentSearch" placeholder="Search students by name or ID..." 
+                   class="w-full px-4 py-3 pr-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200">
+            <select name="student_id" id="studentSelect" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 hidden">
+              <option value="">Select Student</option>
+            </select>
+            <div id="studentResults" class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-auto hidden"></div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                <i class="fas fa-clipboard-list mr-2 text-primary"></i>Exam Type
+              </label>
+              <input type="text" name="exam_type" placeholder="e.g., Midterm, Final" 
+                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200" required>
+            </div>
+            <div class="space-y-3">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                  <i class="fas fa-star mr-2 text-warning"></i>Marks Obtained
+                </label>
+                <input type="number" name="marks_obtained" step="0.01" min="0" 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-warning focus:border-transparent transition-all duration-200" required>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                  <i class="fas fa-calculator mr-2 text-primary"></i>Total Marks
+                </label>
+                <input type="number" name="total_marks" step="0.01" min="1" 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200" required>
+              </div>
+            </div>
+          </div>
+          
+          <button type="submit" class="w-full bg-gradient-to-r from-primary to-secondary text-white py-4 px-8 rounded-xl font-semibold shadow-lg hover:shadow-xl hover:from-primary/90 transition-all duration-300 transform hover:-translate-y-1 btn-shimmer text-lg">
+            <i class="fas fa-plus mr-3"></i>
+            Add Exam Result
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Recent Results Summary -->
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden animate-fade-in block">
+      <div class="bg-gradient-to-r from-success to-green-600 px-8 py-6">
+        <h2 class="text-2xl font-bold text-white flex items-center">
+          <i class="fas fa-chart-bar mr-3"></i>
+          Recent Results
+        </h2>
+      </div>
+      <div class="p-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="text-center p-6 bg-gray-50 rounded-xl">
+            <div class="text-3xl font-bold text-primary mb-2">{{ students|length }}</div>
+            <p class="text-sm text-gray-600 font-medium">Total Students</p>
+          </div>
+          <div class="text-center p-6 bg-gray-50 rounded-xl">
+            <div class="text-3xl font-bold text-success mb-2">{{ recent_count|default(0) }}</div>
+            <p class="text-sm text-gray-600 font-medium">Results Today</p>
+          </div>
+          <div class="text-center p-6 bg-gray-50 rounded-xl">
+            <div class="text-3xl font-bold text-warning mb-2">{{ top_grade|default('A') }}</div>
+            <p class="text-sm text-gray-600 font-medium">Top Grade</p>
+          </div>
+          <div class="text-center p-6 bg-gray-50 rounded-xl">
+            <div class="text-3xl font-bold text-info mb-2">{{ (avg_score|default(0))|round(1) }}%</div>
+            <p class="text-sm text-gray-600 font-medium">Average Score</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Table -->
+  <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+    <div class="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
+      <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+        <h2 class="text-2xl font-bold text-gray-900 flex items-center flex-1">
+          <i class="fas fa-table mr-3 text-primary"></i>
+          Exam Results
+        </h2>
+        <div class="relative flex-1 max-w-md full-width-search">
+          <input type="text" id="searchInput" placeholder="Search by name or student number..." 
+                 class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200">
+          <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+        </div>
+      </div>
+    </div>
+    <div class="p-8">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Student</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Class</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Exam Type</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Score</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Grade</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Remarks</th>
+              <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">Date</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200" id="resultsTable">
+            <!-- Dynamic content loaded by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Student search dropdown
+    let studentTimeout;
+    const studentSearch = document.getElementById('studentSearch');
+    const studentSelect = document.getElementById('studentSelect');
+    const studentResults = document.getElementById('studentResults');
+    
+    studentSearch.addEventListener('input', function() {
+      const query = this.value.trim();
+      clearTimeout(studentTimeout);
+      
+      if (query.length < 2) {
+        studentResults.classList.add('hidden');
+        return;
+      }
+      
+      studentTimeout = setTimeout(() => {
+        fetch(`/search_students?q=${encodeURIComponent(query)}`)
+          .then(res => res.json())
+          .then(data => {
+            studentResults.innerHTML = '';
+            if (data.students && data.students.length) {
+              data.students.slice(0, 10).forEach(student => {
+                const div = document.createElement('div');
+                div.className = 'p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0';
+                div.innerHTML = `
+                  <div class="font-medium text-gray-900">${student.name}</div>
+                  <div class="text-sm text-gray-500">${student.class_name} • ${student.admission_number || 'No ID'}</div>
+                `;
+                div.onclick = () => {
+                  studentSearch.value = student.name;
+                  studentSelect.value = student.id;
+                  studentResults.classList.add('hidden');
+                };
+                studentResults.appendChild(div);
+              });
+              studentResults.classList.remove('hidden');
+            } else {
+              studentResults.innerHTML = '<div class="p-3 text-gray-500 text-sm text-center">No students found</div>';
+              studentResults.classList.remove('hidden');
+            }
+          });
+      }, 300);
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!studentSearch.contains(e.target) && !studentResults.contains(e.target)) {
+        studentResults.classList.add('hidden');
+      }
+    });
+
+    // Form submission
+    document.getElementById('addExamForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData);
+      
+      fetch('/teacher/exam-results', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert('Exam result added!');
+          this.reset();
+          document.getElementById('studentSearch').value = '';
+          loadResults();
+        } else {
+          alert('Error adding result');
+        }
+      });
+    });
+    
+    let searchTimeout;
+    
+    // Load results
+    function loadResults(searchTerm = '') {
+      const tbody = document.getElementById('resultsTable');
+      tbody.innerHTML = '<tr><td colspan="7" class="py-12 text-center text-gray-500"><i class="fas fa-spinner fa-spin fa-2x mr-2"></i>Loading...</td></tr>';
+      
+      const url = new URL('/teacher/exam-results', window.location.origin);
+      if (searchTerm.trim()) url.searchParams.set('search', searchTerm.trim());
+      url.searchParams.set('json', '1');
+      
+      fetch(url)
+        .then(res => res.ok ? res.json() : Promise.reject('Network error'))
+        .then(data => {
+          tbody.innerHTML = '';
+          
+          if (data.results?.length) {
+            data.results.forEach(result => {
+              const row = document.createElement('tr');
+              row.className = 'hover:bg-gray-50 transition-colors';
+              row.innerHTML = `
+                <td class="px-6 py-4">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                      <i class="fas fa-user text-blue-600"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">${result.student_name}
+                      <span class="text-sm text-gray-500">(${result.admission_number || 'N/A'})</span>
+                    </span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-sm font-medium text-gray-900">${result.class_name}</td>
+                <td class="px-6 py-4">
+                  <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-info bg-opacity-20 text-info">
+                    ${result.exam_type}
+                  </span>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex items-center">
+                    <span class="text-lg font-bold text-primary">${result.marks_obtained}/${result.total_marks}</span>
+                    <span class="ml-2 text-sm text-gray-500">${((result.marks_obtained/result.total_marks)*100).toFixed(1)}%</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4">
+                  <span class="px-3 py-1 text-sm font-bold rounded-full text-white 
+                            ${result.grade === 'A' ? 'bg-success' : result.grade === 'B' ? 'bg-info' : result.grade === 'C' ? 'bg-warning' : 'bg-danger'}">
+                    ${result.grade}
+                  </span>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-900">${result.remarks || 'N/A'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(result.created_at).toLocaleDateString()}</td>
+              `;
+              tbody.appendChild(row);
+            });
+          } else {
+            tbody.innerHTML = '<tr><td colspan="7" class="py-12 text-center text-gray-500"><i class="fas fa-inbox fa-2x mr-2"></i>No results found</td></tr>';
+          }
+        })
+        .catch(() => {
+          tbody.innerHTML = '<tr><td colspan="7" class="py-12 text-center text-red-500"><i class="fas fa-exclamation-triangle fa-2x mr-2"></i>Error loading results</td></tr>';
+        });
+    }
+
+    // Search debounce
+    document.getElementById('searchInput').addEventListener('input', function() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => loadResults(this.value), 300);
+    });
+
+    loadResults(); // Initial load
+  });
+</script>
+
+{% endblock %}
+

@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Add Student{% endblock %}
+
+{% block header %}Register New Student{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <!-- Hero Section -->
+  <div class="text-center mb-12">
+    <div class="bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-600 rounded-3xl shadow-2xl p-8 md:p-12 backdrop-blur-sm">
+      <div class="w-24 h-24 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+        <i class="fas fa-user-plus text-3xl text-white"></i>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">Add New Student</h1>
+      <p class="text-xl text-white/90 max-w-md mx-auto">Complete student registration with emergency contact details</p>
+    </div>
+  </div>
+
+  <!-- Form Card -->
+  <div class="bg-white rounded-3xl shadow-2xl p-8 md:p-12 border border-gray-100">
+    <form method="POST" class="space-y-8">
+      <!-- Basic Info -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-2">
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-3">Full Name <span class="text-red-500">*</span></label>
+          <input type="text" name="name" required 
+                 class="w-full px-5 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 transition-all duration-300 shadow-lg hover:shadow-xl" 
+                 placeholder="Enter student's full name">
+        </div>
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-3">Phone Number <span class="text-red-500">*</span></label>
+          <input type="tel" name="phone" required 
+                 class="w-full px-5 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-emerald-200 focus:border-emerald-500 transition-all duration-300 shadow-lg hover:shadow-xl" 
+                 placeholder="07XXXXXXXX">
+        </div>
+      </div>
+
+      <!-- Address -->
+      <div class="md:col-span-2">
+        <label class="block text-sm font-bold text-gray-700 mb-3">Residence Address <span class="text-red-500">*</span></label>
+        <input type="text" name="residence" required 
+               class="w-full px-5 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 shadow-lg hover:shadow-xl" 
+               placeholder="Student's home address">
+      </div>
+
+      <!-- Next of Kin Section - Grouped -->
+      <div class="bg-gradient-to-r from-orange-50 to-yellow-50 p-8 rounded-3xl border-4 border-orange-100">
+        <div class="text-center mb-8">
+          <div class="w-16 h-16 bg-orange-500 text-white rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <i class="fas fa-shield-alt text-xl"></i>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-800 mb-2">Emergency Contact</h3>
+          <p class="text-gray-600">Parent/Guardian details for emergencies</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-3">Name <span class="text-red-500">*</span></label>
+            <input type="text" name="next_of_kin_name" required 
+                   class="w-full px-5 py-4 border border-orange-200 rounded-2xl focus:ring-4 focus:ring-orange-200 focus:border-orange-500 transition-all duration-300 shadow-lg hover:shadow-xl" 
+                   placeholder="Parent/Guardian full name">
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-3">Relationship <span class="text-red-500">*</span></label>
+            <input type="text" name="next_of_kin_relationship" required 
+                   class="w-full px-5 py-4 border border-orange-200 rounded-2xl focus:ring-4 focus:ring-orange-200 focus:border-orange-500 transition-all duration-300 shadow-lg hover:shadow-xl" 
+                   placeholder="Mother, Father, Guardian">
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-3">Phone <span class="text-red-500">*</span></label>
+            <input type="tel" name="next_of_kin_phone" required 
+                   class="w-full px-5 py-4 border border-orange-200 rounded-2xl focus:ring-4 focus:ring-orange-200 focus:border-orange-500 transition-all duration-300 shadow-lg hover:shadow-xl" 
+                   placeholder="07XXXXXXXX">
+          </div>
+        </div>
+      </div>
+
+      <!-- Academic -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-3">Class <span class="text-red-500">*</span></label>
+          <input type="text" name="class_name" required 
+                 class="w-full px-5 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all duration-300 shadow-lg hover:shadow-xl" 
+                 placeholder="e.g. Form 1A, Grade 8">
+        </div>
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-3">Session <span class="text-red-500">*</span></label>
+          <input type="text" name="session" required 
+                 class="w-full px-5 py-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 transition-all duration-300 shadow-lg hover:shadow-xl" 
+                 placeholder="e.g. 2024, Session 6">
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="pt-8 border-t border-gray-100 flex flex-col sm:flex-row gap-4 justify-end">
+        <a href="{{ url_for('main.index') }}" 
+           class="flex-1 sm:w-auto px-10 py-4 bg-gray-100 text-gray-800 font-bold rounded-2xl shadow-sm hover:shadow-md hover:bg-gray-200 focus:ring-4 focus:ring-gray-200 transition-all duration-300 text-center">
+          <i class="fas fa-arrow-left mr-2"></i>Cancel
+        </a>
+        <button type="submit" 
+                class="flex-1 sm:w-auto px-12 py-4 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl focus:ring-4 focus:ring-emerald-300 transition-all duration-300 transform hover:-translate-y-1">
+          <i class="fas fa-user-plus mr-2"></i>Register Student
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        {% for category, message in messages %}
+        const toast{{ loop.index }} = document.createElement('div');
+        toast{{ loop.index }} outerHTML = `
+          <div class="fixed top-6 right-6 z-50 bg-white rounded-2xl shadow-2xl p-6 w-96 border-4 animate-bounce">
+            <div class="flex items-center">
+              <div class="p-3 rounded-2xl {{ 'bg-emerald-100 text-emerald-700' if category == 'success' else 'bg-red-100 text-red-700' }}">
+                <i class="fas {{ 'fa-check-circle' if category == 'success' else 'fa-exclamation-triangle' }} text-2xl"></i>
+              </div>
+              <div class="ml-4">
+                <h4 class="font-bold text-lg text-gray-900">{{ category|title }}</h4>
+                <p class="text-gray-700">{{ message }}</p>
+              </div>
+            </div>
+          </div>`;
+        document.body.appendChild(toast{{ loop.index }});
+        setTimeout(() => {
+          if (toast{{ loop.index }} && toast{{ loop.index }} .parentNode) {
+            toast{{ loop.index }} .remove();
+          }
+        }, 5000);
+        {% endfor %}
+      });
+    </script>
+  {% endif %}
+  {% endwith %}
+</div>
+{% endblock %}

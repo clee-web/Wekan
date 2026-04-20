@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-light: #3b82f6;
+        --primary-dark: #1d4ed8;
+        --success: #059669;
+        --success-dark: #047857;
+        --warning: #d97706;
+        --warning-dark: #b45309;
+        --danger: #dc2626;
+        --danger-dark: #b91c1c;
+        --gray: #6b7280;
+        --gray-dark: #4b5563;
+    }
+
+    .shadow-soft {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .rounded-lg {
+        border-radius: 0.5rem;
+    }
+
+    .transition-all {
+        transition: all 0.2s ease-in-out;
+    }
+
+    .hover\:translate-y-\[-2px\]:hover {
+        transform: translateY(-2px);
+    }
+
+    .bg-gradient-to-r {
+        background-image: linear-gradient(to right, var(--tw-gradient-stops));
+    }
+
+    .from-primary {
+        --tw-gradient-from: var(--primary);
+        --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(37, 99, 235, 0));
+    }
+
+    .to-primary-dark {
+        --tw-gradient-to: var(--primary-dark);
+    }
+
+    .from-success {
+        --tw-gradient-from: var(--success);
+        --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(5, 150, 105, 0));
+    }
+
+    .to-success-dark {
+        --tw-gradient-to: var(--success-dark);
+    }
+
+    .from-warning {
+        --tw-gradient-from: var(--warning);
+        --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(217, 119, 6, 0));
+    }
+
+    .to-warning-dark {
+        --tw-gradient-to: var(--warning-dark);
+    }
+
+    .from-danger {
+        --tw-gradient-from: var(--danger);
+        --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(220, 38, 38, 0));
+    }
+
+    .to-danger-dark {
+        --tw-gradient-to: var(--danger-dark);
+    }
+
+    .from-gray {
+        --tw-gradient-from: var(--gray);
+        --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(107, 114, 128, 0));
+    }
+
+    .to-gray-dark {
+        --tw-gradient-to: var(--gray-dark);
+    }
+</style>
+{% endblock %}
+
+{% block title %}Student Profile - {{ student.name }}{% endblock %}
+
+{% block header %}Student Profile{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-12 gap-6">
+    <!-- Student Profile Card -->
+    <div class="col-span-12 lg:col-span-4 space-y-6">
+        <div class="bg-white rounded-lg shadow">
+            <div class="p-6">
+                <div class="flex items-center space-x-4 mb-6">
+                    <div class="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
+                        <i class="fas fa-user-graduate text-4xl text-primary"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">{{ student.name }}</h2>
+                        <p class="text-sm text-gray-500">ID: {{ student.admission_number or student.id }}</p>
+                        <p class="text-xs text-gray-400">Active: {{ 'Yes' if student.active else 'No' }}</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                <i class="fas fa-graduation-cap text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">Class</p>
+                                <p class="font-semibold text-gray-900">{{ student.class_name }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                                <i class="fas fa-calendar text-green-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">Session</p>
+                                <p class="font-semibold text-gray-900">{{ student.session }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
+                                <i class="fas fa-home text-orange-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">Residence</p>
+                                <p class="font-semibold text-gray-900 truncate max-w-[150px]">{{ student.residence or 'Not provided' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="mt-6 p-4 bg-white border rounded-lg shadow-soft">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            <i class="fas fa-phone text-xl text-primary"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-800">Contact</h4>
+                    </div>
+                    <p class="text-gray-900">{{ student.phone or 'Not provided' }}</p>
+                </div>
+
+                <!-- Next of Kin Information -->
+                <div class="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                            <i class="fas fa-user-friends text-xl text-emerald-600"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-800">Next of Kin</h4>
+                    </div>
+                    <div class="space-y-1 text-sm">
+                        <p><span class="font-medium text-gray-900">Name:</span> {{ student.next_of_kin_name or 'Not provided' }}</p>
+                        <p><span class="font-medium text-gray-900">Relationship:</span> {{ student.next_of_kin_relationship or 'Not provided' }}</p>
+                        <p><span class="font-medium text-gray-900">Phone:</span> {{ student.next_of_kin_phone or 'Not provided' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="space-y-3">
+            <a href="{{ url_for('teacher_routes.view_students') }}" 
+               class="inline-flex items-center w-full px-6 py-3 text-sm font-medium text-white 
+                      bg-gradient-to-r from-gray to-gray-dark rounded-lg shadow-soft 
+                      hover:from-gray-dark hover:to-gray hover:translate-y-[-1px] transition-all">
+                <i class="fas fa-arrow-left text-lg mr-3"></i>
+                Back to Students
+            </a>
+
+            <a href="{{ url_for('teacher_routes.mark_attendance_bulk') }}" 
+               class="inline-flex items-center w-full px-6 py-3 text-sm font-medium text-white 
+                      bg-gradient-to-r from-success to-success-dark rounded-lg shadow-soft 
+                      hover:from-success-dark hover:to-success hover:translate-y-[-1px] transition-all">
+                <i class="fas fa-check text-lg mr-3"></i>
+                Mark Attendance
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content: Summary Cards & Tables -->
+    <div class="col-span-12 lg:col-span-8 space-y-6">
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Attendance Summary -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mr-4">
+                        <i class="fas fa-calendar-check text-2xl text-purple-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Attendance</p>
+                        {% if attendance %}
+                            {% set total_days = attendance|length %}
+                            {% set present_count = attendance|selectattr('status', 'equalto', 'present')|list|length %}
+                            {% set attendance_pct = (present_count / total_days * 100)|round(1) if total_days > 0 else 0 %}
+                            <p class="text-2xl font-bold text-gray-900">{{ attendance_pct }}%</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ present_count }}/{{ total_days }} present</p>
+                        {% else %}
+                            <p class="text-2xl font-bold text-gray-500">No data</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Name Form -->
+        <div class="bg-white rounded-lg shadow-xl">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-1">Edit Student Name</h3>
+                        <p class="text-gray-500">Update student information</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6">
+                <form action="{{ url_for('teacher_routes.update_student_name', student_id=student.id) }}" method="POST">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Student Name</label>
+                        <input type="text" name="name" value="{{ student.name }}" required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    <button type="submit" class="bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3 rounded-lg font-medium hover:from-primary-dark hover:to-primary transition-all">
+                        <i class="fas fa-save mr-2"></i>Save Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Attendance History Table -->
+        <div class="bg-white rounded-lg shadow-xl">
+            <div class="p-6 border-b border-gray-200">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-1">Attendance History</h3>
+                    <p class="text-gray-500">All attendance records for {{ student.name }}</p>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">Session Type</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-900 uppercase tracking-wider">QR Token</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for record in attendance %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {{ record.date.strftime('%B %d, %Y') }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold
+                                           {% if record.status == 'present' %}bg-green-100 text-green-800
+                                           {% else %}bg-red-100 text-red-800{% endif %}">
+                                    {{ record.status|title }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
+                                           {% if record.session_type == 'class' %}bg-blue-100 text-blue-800
+                                           {% else %}bg-purple-100 text-purple-800{% endif %}">
+                                    {{ record.session_type|title }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
+                                {{ record.qr_token or '-' }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if not attendance %}
+            <div class="text-center py-16 px-6">
+                <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-calendar-times text-3xl text-gray-400"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">No Attendance Records</h3>
+                <p class="text-gray-500">This student hasn't attended any sessions yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

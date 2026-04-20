@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Exams - Wekan Academy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#1e40af',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                        info: '#3b82f6'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-900 mb-2">Manage Exams</h1>
+                    <p class="text-lg text-gray-600">Upload or create exams for printing</p>
+                </div>
+                <a href="{{ url_for('teacher_routes.teacher_dashboard') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-300">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Exam Form -->
+        <div class="bg-white rounded-xl card-shadow p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Create or Upload Exam</h2>
+            <form method="POST" enctype="multipart/form-data">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- Exam Type -->
+                    <div>
+                        <label for="exam_type" class="block text-sm font-medium text-gray-700 mb-2">Exam Type</label>
+                        <select name="exam_type" id="exam_type" required
+                                class="block w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors duration-200">
+                            <option value="">Select exam type</option>
+                            <option value="midterm">Midterm Exam</option>
+                            <option value="final">Final Exam</option>
+                            <option value="quiz">Quiz</option>
+                            <option value="assignment">Assignment</option>
+                            <option value="practical">Practical Exam</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <!-- Exam Title -->
+                    <div>
+                        <label for="exam_title" class="block text-sm font-medium text-gray-700 mb-2">Exam Title</label>
+                        <input type="text" name="exam_title" id="exam_title" required
+                               placeholder="e.g., Computer Programming Midterm"
+                               class="block w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors duration-200">
+                    </div>
+                </div>
+
+                <!-- Tab Selection -->
+                <div class="mb-6">
+                    <div class="flex space-x-4 border-b border-gray-200">
+                        <button type="button" id="tab-upload" onclick="switchTab('upload')"
+                                class="px-4 py-3 border-b-2 border-primary text-primary font-medium">
+                            <i class="fas fa-upload mr-2"></i>Upload File
+                        </button>
+                        <button type="button" id="tab-type" onclick="switchTab('type')"
+                                class="px-4 py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium">
+                            <i class="fas fa-keyboard mr-2"></i>Type Content
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Upload Tab -->
+                <div id="content-upload" class="mb-6">
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition-colors duration-200">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                        <p class="text-sm text-gray-600 mb-2">Drag and drop your exam file here, or</p>
+                        <input type="file" name="exam_file" id="exam_file"
+                               accept=".pdf,.doc,.docx,.txt"
+                               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-secondary">
+                        <p class="text-xs text-gray-500 mt-2">Supported formats: PDF, DOC, DOCX, TXT</p>
+                    </div>
+                </div>
+
+                <!-- Type Tab -->
+                <div id="content-type" class="mb-6 hidden">
+                    <label for="exam_content" class="block text-sm font-medium text-gray-700 mb-2">Exam Content</label>
+                    <textarea name="exam_content" id="exam_content" rows="12"
+                              placeholder="Type your exam content here..."
+                              class="block w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors duration-200 font-mono text-sm"></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex justify-end space-x-4">
+                    <button type="reset"
+                            class="inline-flex items-center px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                        <i class="fas fa-times mr-2"></i>
+                        Clear
+                    </button>
+                    <button type="submit"
+                            class="inline-flex items-center px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-secondary transition-colors duration-200">
+                        <i class="fas fa-print mr-2"></i>
+                        Submit for Printing
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Recent Exams -->
+        <div class="bg-white rounded-xl card-shadow p-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Recent Exams</h2>
+            <div class="text-center py-12">
+                <i class="fas fa-file-alt text-4xl text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No Exams Yet</h3>
+                <p class="text-gray-500">Your uploaded exams will appear here</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            const uploadContent = document.getElementById('content-upload');
+            const typeContent = document.getElementById('content-type');
+            const uploadTab = document.getElementById('tab-upload');
+            const typeTab = document.getElementById('tab-type');
+
+            if (tab === 'upload') {
+                uploadContent.classList.remove('hidden');
+                typeContent.classList.add('hidden');
+                uploadTab.classList.add('border-primary', 'text-primary');
+                uploadTab.classList.remove('border-transparent', 'text-gray-500');
+                typeTab.classList.remove('border-primary', 'text-primary');
+                typeTab.classList.add('border-transparent', 'text-gray-500');
+            } else {
+                uploadContent.classList.add('hidden');
+                typeContent.classList.remove('hidden');
+                typeTab.classList.add('border-primary', 'text-primary');
+                typeTab.classList.remove('border-transparent', 'text-gray-500');
+                uploadTab.classList.remove('border-primary', 'text-primary');
+                uploadTab.classList.add('border-transparent', 'text-gray-500');
+            }
+        }
+    </script>
+</body>
+</html>

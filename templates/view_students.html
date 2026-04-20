@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}View Students{% endblock %}
+
+{% block header %}All Students{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Header -->
+  <div class="text-center mb-12">
+    <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-3xl shadow-2xl p-8 md:p-12 backdrop-blur-sm">
+      <h1 class="text-3xl md:text-5xl font-bold text-white mb-4 flex items-center justify-center">
+        <i class="fas fa-address-book mr-2"></i>
+        Student Directory
+      </h1>
+      <p class="text-xl text-indigo-100">Complete list of all registered students</p>
+    </div>
+  </div>
+
+  <!-- Search and Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-xl shadow-soft p-6">
+      <div class="text-3xl font-bold text-primary">{{ students|length }}</div>
+      <div class="text-sm text-gray-600 mt-1">Total Students</div>
+    </div>
+    <div class="bg-white rounded-xl shadow-soft p-6">
+      <div class="text-3xl font-bold text-green-600">{{ students|selectattr('active', 'equalto', true)|list|length }}</div>
+      <div class="text-sm text-gray-600 mt-1">Active</div>
+    </div>
+    <div class="bg-white rounded-xl shadow-soft p-6">
+      <div class="text-3xl font-bold text-orange-600">{{ students|selectattr('active', 'equalto', false)|list|length }}</div>
+      <div class="text-sm text-gray-600 mt-1">Inactive</div>
+    </div>
+  </div>
+
+  <!-- Students Table -->
+  <div class="bg-white rounded-xl shadow-soft overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-800">Students List</h2>
+    </div>
+    
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Admission No.</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Session/Class</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for student in students %}
+          <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ student.id }}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900">{{ student.name }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ student.admission_number or 'N/A' }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ student.session or student.class_name or 'N/A' }}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              {% if student.active %}
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+              {% else %}
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">Inactive</span>
+              {% endif %}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+              <a href="{{ url_for('teacher_routes.view_student_detail', student_id=student.id) }}" class="text-indigo-600 hover:text-indigo-900">
+                <i class="fas fa-eye mr-1"></i>View Profile
+              </a>
+              <a href="{{ url_for('teacher_routes.mark_attendance_bulk') }}" class="text-green-600 hover:text-green-900">
+                <i class="fas fa-check mr-1"></i>Mark Attendance
+              </a>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+              <i class="fas fa-users text-4xl mb-4 block"></i>
+              No students found
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination Placeholder -->
+  {% if students|length > 10 %}
+  <div class="mt-8 flex justify-between items-center">
+    <div class="text-sm text-gray-600">Showing {{ students|length }} students</div>
+    <div class="space-x-2">
+      <!-- Add pagination links here if needed -->
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - Wekan Academy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#1e40af',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                        info: '#3b82f6'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-border {
+            --tw-gradient-from: #2563eb;
+            --tw-gradient-to: #1e40af;
+            --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+            background: linear-gradient(135deg, var(--tw-gradient-from), var(--tw-gradient-to));
+        }
+        
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .card-shadow:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen transition-colors duration-300 ease-in-out">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Professional Header -->
+        <div class="mb-12">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-900 mb-2">Teacher Dashboard</h1>
+                    <p class="text-lg text-gray-600">Welcome back, {{ current_user.teacher.name if current_user.teacher else 'Teacher' }}</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/qr_attendance" class="inline-flex items-center px-4 py-2 bg-success text-white rounded-lg hover:bg-green-700 transition-colors duration-300 shadow-sm hover:shadow-md">
+                        <i class="fas fa-qrcode mr-2"></i>
+                        QR Scanner
+                    </a>
+                    <div class="relative">
+                        <input type="checkbox" id="theme-toggle" class="sr-only peer">
+                        <label for="theme-toggle" class="cursor-pointer bg-gray-200 rounded-full p-2 hover:bg-gray-300 transition-colors duration-300">
+                            <div class="w-12 h-6 bg-gray-300 rounded-full peer-checked:bg-primary peer-checked:after:translate-x-full after:absolute after:w-6 after:h-6 after:rounded-full after:bg-white after:transition-transform after:duration-300 after:content-['']"></div>
+                        </label>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-2 hover:shadow-md transition-shadow">
+                        <i class="fas fa-bell text-gray-500"></i>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-sm p-2 hover:shadow-md transition-shadow">
+                        <i class="fas fa-cog text-gray-500"></i>
+                    </div>
+                    <a href="/teacher/logout" class="bg-white rounded-lg shadow-sm p-2 hover:shadow-md transition-shadow text-gray-500 hover:text-red-500">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <p class="text-sm text-gray-500">Last updated: {{ 'now'|datetimeformat }}</p>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <!-- Total Students -->
+            <div class="bg-white rounded-xl card-shadow p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-50 text-blue-500">
+                        <i class="fas fa-users text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Total Students</p>
+                        <div class="flex items-baseline">
+                            <h3 class="text-2xl font-bold text-gray-800">{{ students|length }}</h3>
+                            <p class="text-xs text-gray-500 ml-2">Active</p>
+                        </div>
+                        <div class="mt-2 text-sm text-gray-500">
+                            <p>Students under your supervision</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Classes -->
+            <a href="{{ url_for('teacher_routes.view_students') }}" class="bg-white rounded-xl card-shadow p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 block">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-50 text-green-500">
+                        <i class="fas fa-school text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Classes</p>
+                        <div class="flex items-baseline">
+                            <h3 class="text-2xl font-bold text-gray-800">{{ classes|length }}</h3>
+                            <p class="text-xs text-gray-500 ml-2">Assigned</p>
+                        </div>
+                        <div class="mt-2 text-sm text-gray-500">
+                            <p>Classes you teach</p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Today's Attendance -->
+            <div class="bg-white rounded-xl card-shadow p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-yellow-50 text-yellow-500">
+                        <i class="fas fa-calendar-check text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Today's Attendance</p>
+                        <div class="flex items-baseline">
+                            <h3 class="text-2xl font-bold text-gray-800">--</h3>
+                            <p class="text-xs text-gray-500 ml-2">Marked</p>
+                        </div>
+                        <div class="mt-2 text-sm text-gray-500">
+                            <p>Use QR scanner for quick marking</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exam Upload -->
+            <a href="{{ url_for('teacher_routes.manage_exams') }}" class="bg-white rounded-xl card-shadow p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 block">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-red-50 text-red-500">
+                        <i class="fas fa-file-upload text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Exam Upload</p>
+                        <div class="flex items-baseline">
+                            <h3 class="text-2xl font-bold text-gray-800">Upload</h3>
+                            <p class="text-xs text-gray-500 ml-2">Exams</p>
+                        </div>
+                        <div class="mt-2 text-sm text-gray-500">
+                            <p>Create or upload exams for printing</p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Quick Actions</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <!-- QR Scanner -->
+                <div class="bg-white rounded-xl card-shadow p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 text-center">
+                    <div class="flex justify-center mb-4">
+                        <div class="p-4 rounded-full bg-primary text-white">
+                            <i class="fas fa-qrcode text-3xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">QR Scanner</h3>
+                    <p class="text-sm text-gray-600 mb-4">Scan student codes for instant attendance marking</p>
+                    <a href="/qr_attendance" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-secondary transition-colors duration-300">
+                        <i class="fas fa-camera mr-2"></i>
+                        Open Scanner
+                    </a>
+                </div>
+
+                <!-- Mark Attendance -->
+                <div class="bg-white rounded-xl card-shadow p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 text-center">
+                    <div class="flex justify-center mb-4">
+                        <div class="p-4 rounded-full bg-success text-white">
+                            <i class="fas fa-user-check text-3xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Mark Attendance</h3>
+                    <p class="text-sm text-gray-600 mb-4">Manual attendance marking for your classes</p>
+                    <a href="{{ url_for('teacher_routes.mark_attendance_bulk') }}" class="inline-flex items-center px-4 py-2 bg-success text-white rounded-lg hover:bg-green-600 transition-colors duration-300">
+                        <i class="fas fa-clipboard-check mr-2"></i>
+                        Mark Now
+                    </a>
+                </div>
+
+                <!-- Exam Results -->
+                <div class="bg-white rounded-xl card-shadow p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 text-center">
+                    <div class="flex justify-center mb-4">
+                        <div class="p-4 rounded-full bg-info text-white">
+                            <i class="fas fa-chart-line text-3xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Exam Results</h3>
+                    <p class="text-sm text-gray-600 mb-4">Manage and update student exam results</p>
+                    <a href="{{ url_for('teacher_routes.manage_exam_results') }}" class="inline-flex items-center px-4 py-2 bg-info text-white rounded-lg hover:bg-blue-600 transition-colors duration-300">
+                        <i class="fas fa-graduation-cap mr-2"></i>
+                        Results
+                    </a>
+                </div>
+
+                <!-- View Students -->
+                <div class="bg-white rounded-xl card-shadow p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 text-center">
+                    <div class="flex justify-center mb-4">
+                        <div class="p-4 rounded-full bg-warning text-white">
+                            <i class="fas fa-users text-3xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">View Students</h3>
+                    <p class="text-sm text-gray-600 mb-4">Browse your student directory</p>
+                    <a href="{{ url_for('teacher_routes.view_students') }}" class="inline-flex items-center px-4 py-2 bg-warning text-white rounded-lg hover:bg-yellow-600 transition-colors duration-300">
+                        <i class="fas fa-address-book mr-2"></i>
+                        Directory
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Students Table -->
+        <div class="bg-white rounded-xl card-shadow border border-gray-100">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold text-gray-900">Your Students</h2>
+                    <div class="flex space-x-3">
+                        <a href="{{ url_for('teacher_routes.view_students') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-300">
+                            <i class="fas fa-list mr-2"></i>
+                            View All
+                        </a>
+                        <a href="/qr_attendance" class="inline-flex items-center px-4 py-2 bg-success text-white rounded-lg hover:bg-green-600 transition-colors duration-300">
+                            <i class="fas fa-qrcode mr-2"></i>
+                            Scan QR
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                {% if students %}
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <i class="fas fa-user mr-2"></i>Name
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <i class="fas fa-id-card mr-2"></i>Admission
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <i class="fas fa-school mr-2"></i>Class
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <i class="fas fa-phone mr-2"></i>Phone
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <i class="fas fa-envelope mr-2"></i>Email
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <i class="fas fa-cogs mr-2"></i>Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                {% for student in students[:10] %}
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10">
+                                                <div class="h-10 w-10 rounded-full bg-primary text-white flex items-center justify-center font-semibold">
+                                                    {{ student.name[0]|upper }}
+                                                </div>
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">{{ student.name }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                            {{ student.admission_number or 'N/A' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                            {{ student.class_name or 'N/A' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ student.phone }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ student.email }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div class="flex space-x-2">
+                                            <a href="{{ url_for('teacher_routes.class_students', class_name=student.class_name) }}" class="text-primary hover:text-secondary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ url_for('teacher_routes.mark_attendance_bulk') }}?class_name={{ student.class_name }}" class="text-success hover:text-green-600">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if students|length > 10 %}
+                    <div class="mt-6 text-center">
+                        <a href="{{ url_for('teacher_routes.view_students') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-300">
+                            View All {{ students|length }} Students
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-12">
+                        <i class="fas fa-users text-4xl text-gray-300 mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Students Found</h3>
+                        <p class="text-gray-500">There are no students assigned to you yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+
+{% block title %}Add New Teacher - IYF FREE WEEKEND ACADEMY{% endblock %}
+
+{% block header %}Add Teacher{% endblock %}
+
+{% block extra_css %}
+<style>
+  .sidebar-hidden {
+    grid-template-columns: 1fr;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sidebar-hidden">
+  <div class="container mx-auto px-4 py-8 max-w-6xl">
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="gradient-bg rounded-2xl shadow-lg p-8 animate-slide-up">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="text-center md:text-left mb-4 md:mb-0">
+            <h1 class="text-4xl font-bold text-white mb-2 flex items-center justify-center md:justify-start">
+              <i class="fas fa-user-plus mr-3"></i>
+              Add New Teacher
+            </h1>
+            <p class="text-blue-100 text-lg">Create a new teacher account and assign credentials</p>
+          </div>
+          <div class="text-center md:text-right">
+            <a href="{{ url_for('main.index') }}" class="inline-flex items-center px-6 py-3 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-all duration-300 shadow-sm hover:shadow-md">
+              <i class="fas fa-arrow-left mr-2"></i>
+              Back to Dashboard
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Form Section -->
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden animate-fade-in">
+          <div class="bg-white border-b border-gray-200 px-8 py-6">
+            <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+              <i class="fas fa-user-tie text-primary mr-3"></i>
+              Teacher Information
+            </h2>
+          </div>
+          
+          <div class="p-8">
+            <form method="POST" id="addTeacherForm" class="space-y-8">
+              <!-- Personal Information -->
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <i class="fas fa-user mr-2 text-primary"></i>
+                  Personal Information
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label for="first_name" class="block text-sm font-medium text-gray-700 mb-2">
+                      <i class="fas fa-user mr-2 text-muted"></i>First Name
+                    </label>
+                    <input type="text" 
+                           id="first_name" 
+                           name="first_name" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                           placeholder="Enter first name" 
+                           required>
+                  </div>
+                  <div>
+                    <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">
+                      <i class="fas fa-user mr-2 text-muted"></i>Last Name
+                    </label>
+                    <input type="text" 
+                           id="last_name" 
+                           name="last_name" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                           placeholder="Enter last name" 
+                           required>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Contact Information -->
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <i class="fas fa-envelope mr-2 text-primary"></i>
+                  Contact Information
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                      <i class="fas fa-envelope mr-2 text-muted"></i>Email Address
+                    </label>
+                    <input type="email" 
+                           id="email" 
+                           name="email" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                           placeholder="teacher@school.com" 
+                           required>
+                  </div>
+                  <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
+                      <i class="fas fa-phone mr-2 text-muted"></i>Phone Number
+                    </label>
+                    <input type="tel" 
+                           id="phone" 
+                           name="phone" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                           placeholder="+254 XXX XXX XXX" 
+                           required>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Professional Information -->
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <i class="fas fa-briefcase mr-2 text-primary"></i>
+                  Professional Information
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">
+                      <i class="fas fa-book mr-2 text-muted"></i>Subject
+                    </label>
+                    <input type="text" 
+                           id="subject" 
+                           name="subject" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                           placeholder="e.g., Mathematics, English" 
+                           required>
+                  </div>
+                  <div>
+                    <label for="qualification" class="block text-sm font-medium text-gray-700 mb-2">
+                      <i class="fas fa-graduation-cap mr-2 text-muted"></i>Qualification
+                    </label>
+                    <input type="text" 
+                           id="qualification" 
+                           name="qualification" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                           placeholder="e.g., B.Ed, M.Sc" 
+                           required>
+                  </div>
+                </div>
+                <div class="mt-6">
+                  <label for="class_name" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-chalkboard mr-2 text-muted"></i>Class Assignment
+                  </label>
+                  <input type="text" 
+                         id="class_name" 
+                         name="class_name" 
+                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                         placeholder="e.g., Grade 7A, Form 3B">
+                </div>
+              </div>
+
+              <!-- Submit Buttons -->
+              <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+                <a href="{{ url_for('main.index') }}" 
+                   class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+                  <i class="fas fa-times mr-2"></i>
+                  Cancel
+                </a>
+                <button type="submit" 
+                        class="flex-1 sm:flex-none inline-flex items-center justify-center px-8 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-secondary transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg relative overflow-hidden btn-shimmer">
+                  <i class="fas fa-user-plus mr-2"></i>
+                  Add Teacher
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="lg:col-span-1 space-y-6">
+        <!-- Quick Tips -->
+        <div class="bg-white rounded-xl shadow-lg p-6 animate-fade-in">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            <i class="fas fa-lightbulb text-warning mr-2"></i>
+            Quick Tips
+          </h3>
+          <ul class="space-y-3 text-sm text-gray-600">
+            <li class="flex items-start">
+              <i class="fas fa-check-circle text-success mr-2 mt-1"></i>
+              <span>Use a professional email address for the teacher account</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check-circle text-success mr-2 mt-1"></i>
+              <span>Phone number should include country code</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check-circle text-success mr-2 mt-1"></i>
+              <span>Class assignment helps organize students</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fas fa-check-circle text-success mr-2 mt-1"></i>
+              <span>Temporary password will be auto-generated</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Account Information -->
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 animate-fade-in">
+          <h3 class="text-lg font-semibold text-blue-900 mb-4">
+            <i class="fas fa-info-circle text-info mr-2"></i>
+            Account Creation
+          </h3>
+          <div class="space-y-3 text-sm text-blue-800">
+            <p>• Username will be the email address</p>
+            <p>• Temporary password auto-generated (12 chars)</p>
+            <p>• Teacher can change password later</p>
+            <p>• Account activated immediately</p>
+          </div>
+        </div>
+
+        <!-- Required Fields -->
+        <div class="bg-white rounded-xl shadow-lg p-6 animate-fade-in">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            <i class="fas fa-asterisk text-danger mr-2"></i>
+            Required Fields
+          </h3>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-600">First Name</span>
+              <span class="text-danger font-medium">Required</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Last Name</span>
+              <span class="text-danger font-medium">Required</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Email</span>
+              <span class="text-danger font-medium">Required</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Phone</span>
+              <span class="text-danger font-medium">Required</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Subject</span>
+              <span class="text-danger font-medium">Required</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Qualification</span>
+              <span class="text-danger font-medium">Required</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Class</span>
+              <span class="text-gray-500 font-medium">Optional</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Security Notice -->
+        <div class="bg-green-50 border border-green-200 rounded-xl p-6 animate-fade-in">
+          <h3 class="text-lg font-semibold text-green-900 mb-4">
+            <i class="fas fa-shield-alt text-success mr-2"></i>
+            Security Notice
+          </h3>
+          <p class="text-sm text-green-800">
+            Teacher accounts will have access to student management, attendance tracking, and exam results. Ensure all information is accurate before creating the account.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flash Messages - moved to content block for proper positioning -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div id="flash-{{ loop.index }}" class="fixed top-24 right-4 z-50 max-w-sm animate-slide-up">
+          {% if category == 'error' %}
+            <div class="bg-white rounded-lg shadow-xl border-l-4 border-red-500 p-4">
+              <div class="flex items-center">
+                <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+                <div>
+                  <h4 class="text-sm font-semibold text-gray-900">Error!</h4>
+                  <p class="text-sm text-gray-600">{{ message }}</p>
+                </div>
+              </div>
+            </div>
+          {% else %}
+            <div class="bg-white rounded-lg shadow-xl border-l-4 border-green-500 p-4">
+              <div class="flex items-center">
+                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                <div>
+                  <h4 class="text-sm font-semibold text-gray-900">Success!</h4>
+                  <p class="text-sm text-gray-600">{{ message }}</p>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+        <script>
+          // Auto-hide flash after 5 seconds
+          setTimeout(() => {
+            document.getElementById('flash-{{ loop.index }}').style.opacity = '0';
+            setTimeout(() => document.getElementById('flash-{{ loop.index }}').remove(), 300);
+          }, 5000);
+        </script>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Interactive enhancements from original
+  document.addEventListener('DOMContentLoaded', function() {
+    // Form field focus effects
+    const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"]');
+    inputs.forEach(input => {
+      input.addEventListener('focus', function() {
+        this.parentElement.classList.add('ring-4', 'ring-primary/20', 'scale-105');
+      });
+      input.addEventListener('blur', function() {
+        this.parentElement.classList.remove('ring-4', 'ring-primary/20', 'scale-105');
+      });
+    });
+
+    // Button shimmer effect
+    const buttons = document.querySelectorAll('.btn-shimmer');
+    buttons.forEach(btn => {
+      btn.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-2px) scale(1.02)';
+      });
+      btn.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+      });
+    });
+
+    // Form validation
+    const form = document.getElementById('addTeacherForm');
+    form.addEventListener('submit', function(e) {
+      const email = document.getElementById('email').value;
+      const phone = document.getElementById('phone').value;
+      
+      if (!email.includes('@') || !email.includes('.')) {
+        e.preventDefault();
+        alert('Please enter a valid email address');
+        document.getElementById('email').focus();
+        return false;
+      }
+      
+      if (phone.length < 10 || !phone.match(/^\+?[\d\s-()]+$/)) {
+        e.preventDefault();
+        alert('Please enter a valid phone number (10+ digits)');
+        document.getElementById('phone').focus();
+        return false;
+      }
+    });
+  });
+</script>
+{% endblock %}

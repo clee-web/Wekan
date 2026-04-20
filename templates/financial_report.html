@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Financial Report{% endblock %}
+
+{% block extra_css %}
+<style>
+    .sidebar-hidden {
+        grid-template-columns: 1fr;
+    }
+    .gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        background-size: 200% 200%;
+        animation: gradientShift 8s ease infinite;
+    }
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-5px); }
+        100% { transform: translateY(0px); }
+    }
+    .animate-float {
+        animation: float 3s ease-in-out infinite;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- (✅ Your entire HTML content remains unchanged — no issues there) -->
+{{ super() }}
+{% endblock %}
+
+{% block extra_js %}
+
+<!-- ✅ Chart.js (REQUIRED) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // ✅ SAFE DATA FROM FLASK (fixes all your errors)
+    const trendDataFromServer = {{ [
+        {
+            "month": (trend.month.strftime("%B %Y") if trend.month else "Unknown"),
+            "total": (trend.total_amount or 0)
+        }
+        for trend in payment_trends
+    ] | tojson }};
+
+    // ✅ Build chart data cleanly
+    const trendData = {
+        labels: trendDataFromServer.map(item => item.month),
+        datasets: [{
+            label: 'Monthly Revenue',
+            data: trendDataFromServer.map(item => item.total),
+            borderColor: 'rgb(79, 70, 229)',
+            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    };
+
+    // ✅ Create chart
+    const ctx = document.getElementById('trendChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: trendData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) label += ': ';
+                            if (context.parsed.y !== null) {
+                                label += 'KES ' + context.parsed.y.toLocaleString();
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'KES ' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}

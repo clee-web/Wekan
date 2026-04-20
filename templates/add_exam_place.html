@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+
+{% block title %}Add Exam Place - IYF FREE WEEKEND ACADEMY{% endblock %}
+
+{% block header %}Assign Exam Place{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+  <!-- Hero Header -->
+  <div class="text-center mb-12">
+    <div class="bg-gradient-to-r from-orange-500 via-red-500 to-pink-600 rounded-3xl shadow-2xl p-8 md:p-12 backdrop-blur-sm">
+      <div class="w-24 h-24 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl">
+        <i class="fas fa-ticket-alt text-3xl text-white"></i>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">Assign Exam Place</h1>
+      <p class="text-xl text-white/90 max-w-md mx-auto">
+        Set student seating arrangements and exam details for organized testing
+      </p>
+    </div>
+  </div>
+
+  <!-- Main Form -->
+  <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
+    <div class="px-8 py-6 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+      <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+        <i class="fas fa-map-marked-alt text-orange-500 mr-3"></i>
+        Exam Place Details
+      </h2>
+    </div>
+    
+    <div class="p-8">
+      <form method="POST" class="space-y-8">
+        <!-- Student Selection -->
+        <div>
+          <label for="student_id" class="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+            <i class="fas fa-user-graduate text-orange-500 mr-2"></i>Student <span class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            <select id="student_id" name="student_id" required 
+                    class="w-full px-5 py-4 pr-12 border border-gray-200 rounded-2xl bg-white/50 
+                           focus:ring-4 focus:ring-orange-200 focus:border-orange-500 
+                           transition-all duration-300 shadow-lg hover:shadow-xl text-lg 
+                           appearance-none bg-no-repeat bg-right">
+              <option value="">Select a student</option>
+              {% for student in students %}
+              <option value="{{ student.id }}">
+                {{ student.name }} · {{ student.class_name }} · {{ student.admission_number or 'No ID' }}
+              </option>
+              {% endfor %}
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
+              <i class="fas fa-chevron-down transition-transform"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exam Type -->
+        <div>
+          <label for="exam_type" class="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+            <i class="fas fa-clipboard-list text-blue-500 mr-2"></i>Exam Type <span class="text-red-500">*</span>
+          </label>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <select id="exam_type" name="exam_type" required 
+                    class="w-full px-5 py-4 pr-12 border border-gray-200 rounded-2xl bg-white/50 
+                           focus:ring-4 focus:ring-blue-200 focus:border-blue-500 
+                           transition-all duration-300 shadow-lg hover:shadow-xl text-lg 
+                           appearance-none bg-no-repeat bg-right">
+              <option value="">Select exam type</option>
+              <option value="class_midterm">📚 Class Mid Term</option>
+              <option value="leadership_midterm">👑 Leadership Mid Term</option>
+              <option value="class_final">📖 Class Final Exam</option>
+              <option value="leadership_final">🏆 Leadership Final Exam</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Exam Details Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <!-- Exam Date -->
+          <div>
+            <label for="exam_date" class="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+              <i class="fas fa-calendar-alt text-purple-500 mr-2"></i>Exam Date <span class="text-red-500">*</span>
+            </label>
+            <input type="date" 
+                   id="exam_date" 
+                   name="exam_date" 
+                   required
+                   class="w-full px-5 py-4 border border-gray-200 rounded-2xl bg-white/50 
+                          focus:ring-4 focus:ring-purple-200 focus:border-purple-500 
+                          transition-all duration-300 shadow-lg hover:shadow-xl text-lg 
+                          placeholder-gray-500">
+          </div>
+
+          <!-- Room Number -->
+          <div>
+            <label for="room_number" class="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+              <i class="fas fa-door-open text-green-500 mr-2"></i>Room Number <span class="text-red-500">*</span>
+            </label>
+            <input type="text" 
+                   id="room_number" 
+                   name="room_number" 
+                   required
+                   class="w-full px-5 py-4 border border-gray-200 rounded-2xl bg-white/50 
+                          focus:ring-4 focus:ring-green-200 focus:border-green-500 
+                          transition-all duration-300 shadow-lg hover:shadow-xl text-lg 
+                          placeholder-gray-500" 
+                   placeholder="e.g., Room A101, Lab 2">
+          </div>
+
+          <!-- Seat Number -->
+          <div class="md:col-span-2">
+            <label for="seat_number" class="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+              <i class="fas fa-chair text-indigo-500 mr-2"></i>Seat Number <span class="text-red-500">*</span>
+            </label>
+            <input type="text" 
+                   id="seat_number" 
+                   name="seat_number" 
+                   required
+                   class="w-full px-5 py-4 border border-gray-200 rounded-2xl bg-white/50 
+                          focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 
+                          transition-all duration-300 shadow-xl hover:shadow-2xl text-lg 
+                          placeholder-gray-500" 
+                   placeholder="e.g., A-15, Desk 23, Row 2 Seat 5">
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 pt-8 border-t border-gray-100">
+          <a href="{{ url_for('exam_places') }}" 
+             class="flex-1 sm:w-auto inline-flex items-center justify-center px-10 py-4 
+                    border-2 border-gray-300 text-lg font-semibold rounded-2xl text-gray-700 
+                    bg-white hover:bg-gray-50 hover:border-gray-400 
+                    focus:ring-4 focus:ring-gray-200 transition-all duration-300 
+                    shadow-sm hover:shadow-md hover:-translate-y-0.5">
+            <i class="fas fa-times mr-2"></i>Cancel
+          </a>
+          
+          <button type="submit" 
+                  class="flex-1 sm:w-auto px-12 py-4 bg-gradient-to-r from-orange-500 to-red-600 
+                         hover:from-orange-600 hover:to-red-700 text-white text-lg font-bold 
+                         rounded-2xl shadow-2xl hover:shadow-3xl focus:ring-4 focus:ring-orange-300 
+                         transition-all duration-300 hover:-translate-y-1">
+            <i class="fas fa-ticket-alt mr-2"></i>Assign Exam Place
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Quick Reference -->
+  <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl border-2 border-blue-100">
+      <div class="flex items-center mb-4">
+        <div class="w-12 h-12 bg-blue-500 text-white rounded-2xl flex items-center justify-center mr-3">
+          <i class="fas fa-info text-xl"></i>
+        </div>
+        <h3 class="font-bold text-xl text-blue-900">Exam Types</h3>
+      </div>
+      <ul class="text-sm space-y-2 text-blue-800">
+        <li>• Class Mid Term - Regular subjects</li>
+        <li>• Leadership Mid Term - Leadership track</li>
+        <li>• Class Final Exam - End of term</li>
+        <li>• Leadership Final - Leadership track final</li>
+      </ul>
+    </div>
+    
+    <div class="bg-gradient-to-r from-emerald-50 to-green-50 p-6 rounded-2xl border-2 border-emerald-100">
+      <div class="flex items-center mb-4">
+        <div class="w-12 h-12 bg-emerald-500 text-white rounded-2xl flex items-center justify-center mr-3">
+          <i class="fas fa-lightbulb text-xl"></i>
+        </div>
+        <h3 class="font-bold text-xl text-emerald-900">Seating Tips</h3>
+      </div>
+      <ul class="text-sm space-y-2 text-emerald-800">
+        <li>• Use consistent format (A-15, Desk 23)</li>
+        <li>• Note special accommodations</li>
+        <li>• Check room capacity</li>
+      </ul>
+    </div>
+    
+    <div class="bg-gradient-to-r from-purple-50 to-violet-50 p-6 rounded-2xl border-2 border-purple-100">
+      <div class="flex items-center mb-4">
+        <div class="w-12 h-12 bg-purple-500 text-white rounded-2xl flex items-center justify-center mr-3">
+          <i class="fas fa-shield-alt text-xl"></i>
+        </div>
+        <h3 class="font-bold text-xl text-purple-900">Required</h3>
+      </div>
+      <ul class="text-sm space-y-2 text-purple-800 font-medium">
+        <li>✅ Student selection</li>
+        <li>✅ Exam type</li>
+        <li>✅ Exam date</li>
+        <li>✅ Room number</li>
+        <li>✅ Seat number</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Custom select styling
+  const selects = document.querySelectorAll('select');
+  selects.forEach(select => {
+    select.addEventListener('focus', function() {
+      this.parentNode.classList.add('ring-4', 'ring-orange-200');
+    });
+    select.addEventListener('blur', function() {
+      this.parentNode.classList.remove('ring-4', 'ring-orange-200');
+    });
+  });
+
+  // Set default exam date to today
+  const examDate = document.getElementById('exam_date');
+  if (!examDate.value) {
+    examDate.value = new Date().toISOString().split('T')[0];
+  }
+
+  // Form validation
+  const form = document.querySelector('form');
+  form.addEventListener('submit', function(e) {
+    const seatNumber = document.getElementById('seat_number').value.trim();
+    if (!seatNumber.match(/^[A-Za-z]?\d+[A-Za-z]?$/)) {
+      e.preventDefault();
+      alert('Please use standard seat format (e.g., A15, Desk23, 42)');
+      return false;
+    }
+  });
+});
+</script>
+{% endblock %}
+

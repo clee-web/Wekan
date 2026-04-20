@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+
+{% block title %}Manage Sessions - IYF FREE WEEKEND ACADEMY{% endblock %}
+
+{% block header %}Academic Sessions{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Hero Header -->
+  <div class="text-center mb-12">
+    <div class="bg-gradient-to-r from-purple-500 via-indigo-500 to-blue-600 rounded-3xl shadow-2xl p-8 md:p-12 backdrop-blur-sm">
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-4 flex items-center justify-center">
+        <i class="fas fa-calendar-alt mr-4 text-4xl"></i>
+        Session Management
+      </h1>
+      <p class="text-xl text-white/90 max-w-2xl mx-auto">
+        Organize academic terms, track active sessions, and manage the school calendar
+      </p>
+    </div>
+  </div>
+
+  <!-- Add Session Button + Stats -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+    <!-- Primary Action -->
+    <div class="lg:col-span-2">
+      <a href="{{ url_for('add_session') }}" 
+         class="group bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 
+                text-white font-bold py-6 px-8 rounded-2xl shadow-2xl hover:shadow-3xl 
+                hover:-translate-y-2 focus:ring-4 focus:ring-emerald-300 
+                transition-all duration-500 flex items-center justify-center text-xl 
+                transform hover:scale-[1.02]">
+        <i class="fas fa-plus-circle text-3xl mr-4 group-hover:rotate-12 transition-transform duration-300"></i>
+        <span>Create New Session</span>
+      </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4">
+      <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 hover:shadow-2xl transition-all duration-300">
+        <div class="flex items-center">
+          <div class="p-3 rounded-2xl bg-green-100 text-green-600">
+            <i class="fas fa-calendar-check text-2xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600 uppercase tracking-wide">Active Sessions</p>
+            <div class="text-3xl font-bold text-gray-900">{{ active_sessions }}</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 hover:shadow-2xl transition-all duration-300">
+        <div class="flex items-center">
+          <div class="p-3 rounded-2xl bg-blue-100 text-blue-600">
+            <i class="fas fa-calendar-times text-2xl"></i>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600 uppercase tracking-wide">Total Sessions</p>
+            <div class="text-3xl font-bold text-gray-900">{{ sessions|length }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sessions Table -->
+  {% if sessions %}
+  <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
+    <!-- Table Header -->
+    <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-8 py-6 border-b border-gray-200">
+      <div class="flex items-center justify-between">
+        <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+          <i class="fas fa-list mr-3 text-indigo-500"></i>
+          All Sessions
+        </h2>
+        <div class="flex items-center space-x-2 text-sm text-gray-500">
+          <span>{{ sessions|length }} sessions</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-8 py-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Session Name</th>
+            <th class="px-8 py-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
+            <th class="px-8 py-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Created</th>
+            <th class="px-8 py-6 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for session in sessions %}
+          <tr class="hover:bg-gray-50 transition-colors duration-200 {% if session.is_active %}bg-green-50/50{% endif %}">
+            <td class="px-8 py-6 whitespace-nowrap">
+              <div class="flex items-center">
+                <div class="w-12 h-12 bg-gradient-to-r {% if session.is_active %}from-emerald-400 to-green-500{% else %}from-gray-400 to-gray-500{% endif %} 
+                       rounded-xl flex items-center justify-center mr-4 shadow-md">
+                  <i class="fas fa-calendar text-white text-lg"></i>
+                </div>
+                <div>
+                  <div class="text-lg font-semibold text-gray-900">{{ session.name }}</div>
+                  {% if session.description %}
+                  <div class="text-sm text-gray-500">{{ session.description[:60] }}{% if session.description|length > 60 %}...{% endif %}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </td>
+            <td class="px-8 py-6 whitespace-nowrap">
+              <span class="inline-flex px-4 py-2 text-sm font-semibold rounded-full 
+                           {% if session.is_active %}
+                             bg-emerald-100 text-emerald-800 border-2 border-emerald-200
+                           {% else %}
+                             bg-gray-100 text-gray-700 border-2 border-gray-200
+                           {% endif %}">
+                {% if session.is_active %}
+                  <i class="fas fa-circle mr-1 text-emerald-500"></i>Active
+                {% else %}
+                  <i class="fas fa-circle mr-1 text-gray-400"></i>Inactive
+                {% endif %}
+              </span>
+            </td>
+            <td class="px-8 py-6 whitespace-nowrap text-sm text-gray-900">
+              {{ session.created_at.strftime('%b %d, %Y') }}
+            </td>
+            <td class="px-8 py-6 whitespace-nowrap text-right text-sm font-medium space-x-2">
+              <a href="{{ url_for('edit_session', session_id=session.id) }}" 
+                 class="inline-flex items-center px-4 py-2 border border-indigo-300 
+                        text-indigo-700 bg-indigo-50 hover:bg-indigo-100 
+                        text-sm font-semibold rounded-xl transition-all duration-200 
+                        hover:shadow-md hover:-translate-y-0.5">
+                <i class="fas fa-edit mr-1"></i>Edit
+              </a>
+              
+              {% if session.is_active %}
+              <span class="inline-flex items-center px-3 py-1 text-xs font-bold 
+                           bg-yellow-100 text-yellow-800 rounded-lg">
+                Currently Active
+              </span>
+              {% else %}
+              <form action="{{ url_for('delete_session', session_id=session.id) }}" 
+                    method="POST" class="inline" 
+                    onsubmit="return confirm('Delete {{ session.name }}? This cannot be undone.');">
+                <button type="submit" 
+                        class="inline-flex items-center px-4 py-2 border border-red-300 
+                               text-red-700 bg-red-50 hover:bg-red-100 
+                               text-sm font-semibold rounded-xl transition-all duration-200 
+                               hover:shadow-md hover:-translate-y-0.5 focus:outline-none">
+                  <i class="fas fa-trash mr-1"></i>Delete
+                </button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <!-- Empty State -->
+  <div class="text-center py-24">
+    <div class="w-32 h-32 bg-gray-100 rounded-3xl flex items-center justify-center mx-auto mb-8">
+      <i class="fas fa-calendar-times text-4xl text-gray-400"></i>
+    </div>
+    <h3 class="text-2xl font-bold text-gray-900 mb-4">No Sessions Yet</h3>
+    <p class="text-lg text-gray-600 mb-8 max-w-md mx-auto">
+      Get started by creating your first academic session. Sessions help organize students and track progress.
+    </p>
+    <a href="{{ url_for('add_session') }}" 
+       class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 
+              text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl 
+              hover:-translate-y-1 transition-all duration-300 text-lg">
+      <i class="fas fa-plus mr-2"></i>Create First Session
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Table row animations
+document.addEventListener('DOMContentLoaded', function() {
+  const rows = document.querySelectorAll('tbody tr');
+  rows.forEach((row, index) => {
+    row.style.opacity = '0';
+    row.style.transform = 'translateY(20px)';
+    
+    setTimeout(() => {
+      row.style.transition = 'all 0.6s ease';
+      row.style.opacity = '1';
+      row.style.transform = 'translateY(0)';
+    }, index * 100);
+  });
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Inactive Students{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Inactive Students <span class="badge bg-danger">{{ inactive_students|length }}</span></h2>
+                <a href="{{ url_for('search_students') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Active Students
+                </a>
+            </div>
+            
+            {% if inactive_students %}
+            <div class="card shadow">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Admission #</th>
+                                    <th>Name</th>
+                                    <th>Class</th>
+                                    <th>Session</th>
+                                    <th>Phone</th>
+                                    <th>Residence</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in inactive_students %}
+                                <tr>
+                                    <td><strong>{{ student.id }}</strong></td>
+                                    <td>{{ student.admission_number or 'N/A' }}</td>
+                                    <td>{{ student.name }}</td>
+                                    <td>{{ student.class_name }}</td>
+                                    <td>{{ student.session }}</td>
+                                    <td>{{ student.phone }}</td>
+                                    <td>{{ student.residence }}</td>
+                                    <td>
+                                        <form method="POST" action="{{ url_for('main.admin_activate_student', student_id=student.id) }}" 
+                                              class="d-inline" onsubmit="return confirm('Reactivate {{ student.name }}?')">
+                                            <button type="submit" class="btn btn-success btn-sm">
+                                                <i class="fas fa-play"></i> Reactivate
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-success text-center">
+                <i class="fas fa-check-circle fa-3x mb-3"></i>
+                <h4>No inactive students</h4>
+                <p>All students are currently active.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

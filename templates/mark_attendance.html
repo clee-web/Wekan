@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mark Attendance - Wekan Academy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#1e40af',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444',
+                        info: '#3b82f6'
+                    },
+                    animation: {
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                    },
+                    keyframes: {
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        }
+        .btn-shimmer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn-shimmer:hover::before {
+            left: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="gradient-bg rounded-2xl shadow-lg p-8 animate-slide-up">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="text-center md:text-left mb-4 md:mb-0">
+                        <h1 class="text-4xl font-bold text-white mb-2 flex items-center justify-center md:justify-start">
+                            <i class="fas fa-clipboard-check mr-3"></i>
+                            Mark Attendance
+                        </h1>
+                        <p class="text-blue-100 text-lg">Record daily attendance for your students</p>
+                    </div>
+                    <div class="text-center md:text-right">
+                        <a href="/teacher/login" class="inline-flex items-center px-6 py-3 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-all duration-300 shadow-sm hover:shadow-md">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Teacher Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 gap-8">
+            <!-- Attendance Form -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden animate-fade-in">
+                <div class="bg-white border-b border-gray-200 px-8 py-6">
+                    <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-users text-primary mr-3"></i>
+                        Student Attendance
+                    </h2>
+                </div>
+                
+                <div class="p-8">
+                    <!-- Date and Save Section -->
+                    <div class="flex flex-col md:flex-row gap-4 mb-6">
+                        <div class="flex-1">
+                            <label for="attendanceDate" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-calendar-alt mr-2 text-primary"></i>Date
+                            </label>
+                            <input type="date" id="attendanceDate" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                                   required>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="saveAttendance()" 
+                                    class="inline-flex items-center px-8 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-secondary transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg relative overflow-hidden btn-shimmer">
+                                <i class="fas fa-save mr-2"></i>
+                                Save Attendance
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Students Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                {% for student in students %}
+                                <tr class="hover:bg-gray-50 transition-colors duration-150">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-user text-gray-600"></i>
+                                            </div>
+                                            <div class="text-sm font-medium text-gray-900">{{ student.name }}</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            {{ student.class_name }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <select name="attendance_{{ student.id }}" 
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200">
+                                            <option value="present" class="text-success">✓ Present</option>
+                                            <option value="absent" class="text-danger">✗ Absent</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="3" class="px-6 py-12 text-center">
+                                        <div class="text-center">
+                                            <i class="fas fa-users-slash fa-3x text-gray-400 mb-4"></i>
+                                            <p class="text-lg text-gray-600 font-medium">No students found</p>
+                                            <p class="text-sm text-gray-500 mt-2">No students are assigned to your class.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+function saveAttendance() {
+    const date = document.getElementById('attendanceDate').value;
+    const attendance = {};
+    
+    document.querySelectorAll('select[name^="attendance_"]').forEach(select => {
+        const studentId = select.name.split('_')[1];
+        attendance[studentId] = select.value;
+    });
+    
+fetch('/teacher/mark_attendance', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            date: date,
+            attendance: attendance
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Attendance saved successfully!');
+        } else {
+            alert('Error saving attendance.');
+        }
+    });
+}
+</script>
+</body>
+</html>

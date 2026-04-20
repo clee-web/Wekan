@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="bg-gradient-primary text-white rounded-3 p-4 shadow-lg">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="mb-2">
+                            <i class="fas fa-user-plus me-2"></i>
+                            Add New Teacher
+                        </h1>
+                        <p class="mb-0 opacity-75">Create a new teacher account and assign credentials</p>
+                    </div>
+                    <div class="text-end">
+                        <a href="{{ url_for('main.index') }}" class="btn btn-light">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-tie text-primary me-2"></i>
+                        Teacher Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="addTeacherForm">
+                        <div class="row">
+                            <!-- Personal Information -->
+                            <div class="col-12 mb-4">
+                                <h6 class="text-primary fw-bold mb-3">
+                                    <i class="fas fa-user me-2"></i>Personal Information
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="first_name" class="form-label fw-semibold">
+                                            <i class="fas fa-user me-2 text-muted"></i>First Name
+                                        </label>
+                                        <input type="text" class="form-control" id="first_name" name="first_name" 
+                                               placeholder="Enter first name" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="last_name" class="form-label fw-semibold">
+                                            <i class="fas fa-user me-2 text-muted"></i>Last Name
+                                        </label>
+                                        <input type="text" class="form-control" id="last_name" name="last_name" 
+                                               placeholder="Enter last name" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Contact Information -->
+                            <div class="col-12 mb-4">
+                                <h6 class="text-primary fw-bold mb-3">
+                                    <i class="fas fa-address-book me-2"></i>Contact Information
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="phone" class="form-label fw-semibold">
+                                            <i class="fas fa-phone me-2 text-muted"></i>Phone Number
+                                        </label>
+                                        <input type="tel" class="form-control" id="phone" name="phone" 
+                                               placeholder="Enter phone number" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label fw-semibold">
+                                            <i class="fas fa-envelope me-2 text-muted"></i>Email Address
+                                        </label>
+                                        <input type="email" class="form-control" id="email" name="email" 
+                                               placeholder="Enter email address" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Professional Information -->
+                            <div class="col-12 mb-4">
+                                <h6 class="text-primary fw-bold mb-3">
+                                    <i class="fas fa-graduation-cap me-2"></i>Professional Information
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="qualification" class="form-label fw-semibold">
+                                            <i class="fas fa-certificate me-2 text-muted"></i>Qualification
+                                        </label>
+                                        <input type="text" class="form-control" id="qualification" name="qualification" 
+                                               placeholder="e.g., BSc Education, MSc Mathematics" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="subject" class="form-label fw-semibold">
+                                            <i class="fas fa-book me-2 text-muted"></i>Subject
+                                        </label>
+                                        <input type="text" class="form-control" id="subject" name="subject" 
+                                               placeholder="e.g., Mathematics, English" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Login Credentials -->
+                            <div class="col-12 mb-4">
+                                <h6 class="text-primary fw-bold mb-3">
+                                    <i class="fas fa-key me-2"></i>Login Credentials
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="username" class="form-label fw-semibold">
+                                            <i class="fas fa-user me-2 text-muted"></i>Username
+                                        </label>
+                                        <input type="text" class="form-control" id="username" name="username" 
+                                               placeholder="Enter username" required>
+                                        <small class="text-muted">This will be used for teacher login</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="password" class="form-label fw-semibold">
+                                            <i class="fas fa-lock me-2 text-muted"></i>Password
+                                        </label>
+                                        <input type="password" class="form-control" id="password" name="password" 
+                                               placeholder="Enter password" required>
+                                        <small class="text-muted">Minimum 6 characters recommended</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{{ url_for('main.index') }}" class="btn btn-light">
+                                        <i class="fas fa-times me-2"></i>Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-user-plus me-2"></i>Add Teacher
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white border-bottom">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle text-info me-2"></i>
+                        Quick Tips
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Username</strong> should be unique and easy to remember
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Email</strong> will be used for password recovery
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Phone</strong> should include country code
+                        </li>
+                        <li class="mb-0">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Qualification</strong> helps in teacher verification
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h6 class="mb-0">
+                        <i class="fas fa-shield-alt text-warning me-2"></i>
+                        Security Notice
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-0">
+                        Please ensure all information is accurate. The teacher will be able to login immediately after account creation.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    transition: all 0.3s ease;
+}
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+.card {
+    border: none;
+    border-radius: 15px;
+}
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+    border-bottom: 1px solid #e9ecef !important;
+}
+</style>
+{% endblock %}

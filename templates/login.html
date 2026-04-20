@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+
+{% block title %}Admin Login - IYF FREE WEEKEND ACADEMY{% endblock %}
+
+{% block extra_css %}
+<style>
+  .full-width-content {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+  .login-container {
+    max-width: 28rem;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+</style>
+{% endblock %}
+
+{% block header %}Sign In{% endblock %}
+
+{% block content %}
+<div class="full-width-content">
+  <!-- Centered Login Form -->
+  <main class="flex items-center justify-center min-h-[70vh] bg-gradient-to-br from-indigo-50 via-white to-blue-50">
+    <div class="login-container">
+      <!-- Logo/Header -->
+      <div class="text-center">
+        <div class="w-20 h-20 bg-gradient-to-r from-primary to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+          <i class="fas fa-graduation-cap text-2xl text-white"></i>
+        </div>
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+        <p class="text-lg text-gray-600">Sign in to your admin account</p>
+      </div>
+
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="bg-white border-l-4 {% if category == 'error' %}border-red-500 bg-red-50{% elif category == 'success' %}border-green-500 bg-green-50{% else %}border-blue-500 bg-blue-50{% endif %} p-4 rounded-r-lg shadow-sm">
+              <div class="flex items-start">
+                <div class="flex-shrink-0 mt-0.5">
+                  {% if category == 'error' %}
+                    <i class="fas fa-exclamation-circle text-red-500 text-lg"></i>
+                  {% elif category == 'success' %}
+                    <i class="fas fa-check-circle text-green-500 text-lg"></i>
+                  {% else %}
+                    <i class="fas fa-info-circle text-blue-500 text-lg"></i>
+                  {% endif %}
+                </div>
+                <div class="ml-3 flex-1">
+                  <p class="text-sm font-medium text-gray-900">{{ message }}</p>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <!-- Login Form -->
+      <form class="bg-white rounded-2xl shadow-xl p-8 space-y-6 border border-gray-100" method="POST" action="{{ url_for('login') }}">
+        <!-- Username Field -->
+        <div>
+          <label for="username" class="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
+            <i class="fas fa-user text-primary mr-2"></i>Username
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <i class="fas fa-user text-gray-400"></i>
+            </div>
+            <input id="username" name="username" type="text" required 
+                   class="w-full pl-12 pr-4 py-4 border border-gray-200 rounded-xl bg-gray-50/50 
+                          focus:ring-3 focus:ring-primary/20 focus:border-primary/70 
+                          focus:bg-white transition-all duration-300 shadow-sm hover:shadow-md text-lg 
+                          placeholder-gray-500" 
+                   placeholder="Enter your username" autocomplete="username">
+          </div>
+        </div>
+
+        <!-- Password Field -->
+        <div>
+          <label for="password" class="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
+            <i class="fas fa-lock text-primary mr-2"></i>Password
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <i class="fas fa-lock text-gray-400"></i>
+            </div>
+            <input id="password" name="password" type="password" required 
+                   class="w-full pl-12 pr-4 py-4 border border-gray-200 rounded-xl bg-gray-50/50 
+                          focus:ring-3 focus:ring-primary/20 focus:border-primary/70 
+                          focus:bg-white transition-all duration-300 shadow-sm hover:shadow-md text-lg 
+                          placeholder-gray-500" 
+                   placeholder="Enter your password" autocomplete="current-password">
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div>
+          <button type="submit" 
+                  class="group w-full flex items-center justify-center py-4 px-6 border-0 
+                         text-lg font-semibold rounded-2xl text-white 
+                         bg-gradient-to-r from-primary via-blue-600 to-indigo-600 
+                         hover:from-primary/90 hover:to-indigo-600/90 
+                         focus:ring-4 focus:ring-primary/30 
+                         shadow-2xl hover:shadow-3xl hover:-translate-y-1 
+                         transition-all duration-300 transform">
+            <span class="absolute left-4">
+              <i class="fas fa-sign-in-alt group-hover:rotate-12 transition-transform duration-300"></i>
+            </span>
+            <span>Sign In to Dashboard</span>
+          </button>
+        </div>
+      </form>
+
+      <!-- Teacher Login Quick Access -->
+      <div class="text-center pt-8 border-t border-gray-200">
+        <p class="text-sm text-gray-600 mb-6">👨‍🏫 Teachers: Access attendance & grading portal</p>
+        <a href="{{ url_for('teacher_routes.teacher_login') }}" 
+           class="inline-flex items-center justify-center px-8 py-4 w-full border-2 border-primary 
+                  text-lg font-semibold rounded-2xl text-primary bg-white 
+                  hover:bg-primary hover:text-white hover:shadow-xl 
+                  hover:-translate-y-1 focus:ring-4 focus:ring-primary/30 
+                  transition-all duration-300 shadow-lg transform">
+          <i class="fas fa-chalkboard-teacher mr-3 text-xl"></i>
+          Teacher Portal
+        </a>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Auto-focus username field
+  document.getElementById('username').focus();
+  
+  // Form submission feedback
+  const form = document.querySelector('form');
+  form.addEventListener('submit', function() {
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Signing In...';
+    submitBtn.disabled = true;
+  });
+});
+</script>
+{% endblock %}
+

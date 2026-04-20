@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block title %}Students{% endblock %}
+
+{% block header %}Students{% endblock %}
+
+{% block extra_css %}
+<style>
+  .gradient-bg {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    background-size: 200% 200%;
+    animation: gradientShift 8s ease infinite;
+  }
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+  <!-- Header with Search -->
+  <div class="gradient-bg rounded-2xl shadow-lg p-8 animate-slide-up">
+    <div class="flex flex-col gap-6">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="text-center md:text-left mb-4 md:mb-0">
+          <h1 class="text-4xl font-bold text-white mb-2 flex items-center justify-center md:justify-start">
+            <i class="fas fa-users mr-3"></i>
+            Students
+          </h1>
+          <p class="text-blue-100 text-lg">Search and manage student records</p>
+        </div>
+        <div class="text-center md:text-right">
+          <a href="{{ url_for('add_student') }}" class="inline-flex items-center px-6 py-3 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-all duration-300 shadow-sm hover:shadow-md">
+            <i class="fas fa-plus mr-2"></i>
+            Add New Student
+          </a>
+        </div>
+      </div>
+
+      <!-- Search Form -->
+      <form method="GET" class="flex flex-col md:flex-row gap-4" id="searchForm">
+        <div class="flex-1 flex items-center gap-4">
+          <div class="flex-1 relative">
+            <input type="text"
+                   name="search"
+                   id="search"
+                   value="{{ request.args.get('search', '') }}"
+                   class="block w-full pl-10 pr-3 py-3 border border-white/30 rounded-lg
+                          bg-white/20 text-white placeholder-white/70
+                          focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent sm:text-sm"
+                   placeholder="Search by name or student ID..."
+                   autocomplete="off">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i class="fas fa-search text-white/70" id="searchIcon"></i>
+              <i class="fas fa-circle-notch fa-spin text-white hidden" id="loadingIcon"></i>
+            </div>
+            {% if request.args.get('search') and not students %}
+            <div class="absolute left-0 right-0 top-full mt-1 p-2 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
+              No students found matching '{{ request.args.get('search') }}'
+            </div>
+            {% endif %}
+          </div>
+          <div class="flex items-center space-x-2">
+            <input type="checkbox"
+                   id="show_inactive"
+                   name="show_inactive"
+                   value="true"
+                   {% if request.args.get('show_inactive') == 'true' %}checked{% endif %}
+                   class="h-4 w-4 text-white focus:ring-white border-white/30 rounded">
+            <label for="show_inactive" class="text-sm text-white">Show Inactive Students</label>
+          </div>
+        </div>
+        <button type="submit"
+                class="inline-flex items-center justify-center px-8 py-3 bg-white text-purple-700 font-semibold rounded-lg hover:bg-white/90 transition-all duration-300 shadow-lg hover:shadow-xl"
+                id="searchButton">
+          <i class="fas fa-search mr-2"></i>
+          Search
+        </button>
+      </form>
+    </div>
+
+    <script>
+    document.getElementById('searchForm').addEventListener('submit', function(e) {
+      document.getElementById('searchIcon').classList.add('hidden');
+      document.getElementById('loadingIcon').classList.remove('hidden');
+      document.getElementById('searchButton').disabled = true;
+    });
+    </script>
+  </div>
+
+  <!-- Students Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for student in students %}
+    <div class="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+      <div class="p-6">
+        <div class="flex items-start justify-between">
+          <div class="flex items-center space-x-4">
+            <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <i class="fas fa-user-graduate text-xl text-primary"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-medium text-gray-900">{{ student.name }}</h3>
+              <p class="text-sm text-gray-500">ID: {{ student.id }}</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                   {% if student.active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+              {{ 'Active' if student.active else 'Inactive' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="mt-6 grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <p class="text-gray-500">Class</p>
+            <p class="font-medium text-gray-900">{{ student.class_name }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">Session</p>
+            <p class="font-medium text-gray-900">{{ student.session }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">Total Paid</p>
+            <p class="font-medium text-gray-900">KES {{ student.total_paid }}</p>
+          </div>
+          <div>
+            <p class="text-gray-500">Last Payment</p>
+            <p class="font-medium text-gray-900">
+              {% if student.last_payment_date %}
+              {{ student.last_payment_date.strftime('%d %b %Y') }}
+              {% else %}
+              No payments
+              {% endif %}
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-6 flex items-center justify-between">
+          <a href="{{ url_for('view_student', student_id=student.id) }}"
+             class="inline-flex items-center text-sm font-medium text-primary hover:text-primary-light">
+            View Details
+            <i class="fas fa-arrow-right ml-2"></i>
+          </a>
+          <div class="flex items-center space-x-2">
+            <a href="{{ url_for('manage_payments', student_id=student.id) }}"
+               class="inline-flex items-center p-2 text-sm font-medium text-gray-700 hover:text-primary
+                      rounded-full hover:bg-gray-100">
+              <i class="fas fa-money-bill"></i>
+            </a>
+            <a href="{{ url_for('edit_student', student_id=student.id) }}"
+               class="inline-flex items-center p-2 text-sm font-medium text-gray-700 hover:text-primary
+                      rounded-full hover:bg-gray-100">
+              <i class="fas fa-edit"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if not students %}
+  <div class="text-center py-12">
+    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+      <i class="fas fa-users text-2xl text-gray-400"></i>
+    </div>
+    {% if request.args.get('search') %}
+    <h3 class="text-lg font-medium text-gray-900 mb-2">No Students Found</h3>
+    <p class="text-gray-500">Try adjusting your search terms.</p>
+    {% else %}
+    <h3 class="text-lg font-medium text-gray-900 mb-2">No Students Yet</h3>
+    <p class="text-gray-500">Start by adding your first student.</p>
+    <div class="mt-6">
+      <a href="{{ url_for('add_student') }}"
+         class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium
+                rounded-md shadow-sm text-white bg-primary hover:bg-primary-light">
+        <i class="fas fa-plus mr-2"></i>
+        Add Student
+      </a>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Pagination -->
+  {% if pagination and pagination.pages > 1 %}
+  <div class="flex items-center justify-between bg-white px-4 py-3 sm:px-6 rounded-lg shadow">
+    <div class="flex flex-1 justify-between sm:hidden">
+      {% if pagination.has_prev %}
+      <a href="{{ url_for('search_students', page=pagination.prev_num, search=request.args.get('search', ''), show_inactive=request.args.get('show_inactive', '')) }}"
+         class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md
+                text-gray-700 bg-white hover:bg-gray-50">
+        Previous
+      </a>
+      {% endif %}
+      {% if pagination.has_next %}
+      <a href="{{ url_for('search_students', page=pagination.next_num, search=request.args.get('search', ''), show_inactive=request.args.get('show_inactive', '')) }}"
+         class="relative ml-3 inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium
+                rounded-md text-gray-700 bg-white hover:bg-gray-50">
+        Next
+      </a>
+      {% endif %}
+    </div>
+    <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+      <div>
+        <p class="text-sm text-gray-700">
+          Showing <span class="font-medium">{{ pagination.total }}</span> results
+        </p>
+      </div>
+      <div>
+        <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+          {% if pagination.has_prev %}
+          <a href="{{ url_for('search_students', page=pagination.prev_num, search=request.args.get('search', ''), show_inactive=request.args.get('show_inactive', '')) }}"
+             class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset
+                    ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+            <i class="fas fa-chevron-left"></i>
+          </a>
+          {% endif %}
+
+          {% for page in pagination.iter_pages() %}
+            {% if page %}
+              {% if page != pagination.page %}
+              <a href="{{ url_for('search_students', page=page, search=request.args.get('search', ''), show_inactive=request.args.get('show_inactive', '')) }}"
+                 class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900
+                        ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                {{ page }}
+              </a>
+              {% else %}
+              <span class="relative z-10 inline-flex items-center bg-primary px-4 py-2 text-sm font-semibold
+                         text-white focus:z-20 focus-visible:outline focus-visible:outline-2
+                         focus-visible:outline-offset-2 focus-visible:outline-primary">
+                {{ page }}
+              </span>
+              {% endif %}
+            {% else %}
+              <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700
+                         ring-1 ring-inset ring-gray-300 focus:outline-offset-0">
+                ...
+              </span>
+            {% endif %}
+          {% endfor %}
+
+          {% if pagination.has_next %}
+          <a href="{{ url_for('search_students', page=pagination.next_num, search=request.args.get('search', ''), show_inactive=request.args.get('show_inactive', '')) }}"
+             class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset
+                    ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+            <i class="fas fa-chevron-right"></i>
+          </a>
+          {% endif %}
+        </nav>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
