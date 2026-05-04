@@ -135,7 +135,7 @@
 
         <!-- Update the Download Report Button to include session -->
         <div class="mt-8 flex justify-end">
-            <a href="{{ url_for('download_report', session=selected_session) }}" 
+            <a href="{{ url_for('main.download_report', session=selected_session) }}" 
                class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
                 <i class="fas fa-download mr-2"></i>
                 Download {{ selected_session if selected_session != 'all' else 'All' }} Sessions Report

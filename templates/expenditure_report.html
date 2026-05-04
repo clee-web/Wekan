@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+
+{% block title %}Expenditure Report{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Cool minimal styles */
+    :root {
+        --primary: #3b82f6;
+        --secondary: #8b5cf6;
+        --success: #10b981;
+        --danger: #ef4444;
+        --dark: #1f2937;
+        --light: #f9fafb;
+    }
+    
+    /* Smooth background */
+    body {
+        background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+    }
+    
+    /* Card hover effect */
+    .cool-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .cool-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Simple slide animation */
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .animate-slide {
+        animation: slideUp 0.5s ease-out forwards;
+    }
+    
+    /* Clean table rows */
+    .table-row {
+        transition: all 0.2s ease;
+    }
+    
+    .table-row:hover {
+        background-color: #f8fafc;
+    }
+    
+    /* Minimal button */
+    .btn-cool {
+        transition: all 0.2s ease;
+        position: relative;
+    }
+    
+    .btn-cool:active {
+        transform: scale(0.98);
+    }
+    
+    /* Modern scrollbar */
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: #e2e8f0;
+        border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: #64748b;
+    }
+    
+    /* Cool stat card */
+    .stat-card {
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    
+    <!-- Clean Header -->
+    <div class="mb-12 animate-slide">
+        <h1 class="text-4xl font-bold text-gray-900 mb-3">
+            Expenditure Report
+        </h1>
+        <p class="text-gray-500 text-lg">
+            Track and manage all business expenses
+        </p>
+        <div class="h-1 w-20 bg-blue-500 rounded-full mt-4"></div>
+    </div>
+    
+    <!-- Minimal Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div class="stat-card bg-white rounded-2xl p-6 shadow-sm cool-card animate-slide" style="animation-delay: 0.1s">
+            <div class="flex items-center justify-between mb-4">
+                <div class="text-gray-400">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <span class="text-xs font-medium text-gray-400">Total</span>
+            </div>
+            <div class="text-3xl font-bold text-gray-900">KES {{ total_expenditure | format_number }}</div>
+            <div class="text-sm text-gray-500 mt-2">Total spent</div>
+        </div>
+        
+        <div class="stat-card bg-white rounded-2xl p-6 shadow-sm cool-card animate-slide" style="animation-delay: 0.2s">
+            <div class="flex items-center justify-between mb-4">
+                <div class="text-gray-400">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                </div>
+                <span class="text-xs font-medium text-gray-400">Count</span>
+            </div>
+            <div class="text-3xl font-bold text-gray-900">{{ expenditure_count }}</div>
+            <div class="text-sm text-gray-500 mt-2">Transactions</div>
+        </div>
+        
+        <div class="stat-card bg-white rounded-2xl p-6 shadow-sm cool-card animate-slide" style="animation-delay: 0.3s">
+            <div class="flex items-center justify-between mb-4">
+                <div class="text-gray-400">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                    </svg>
+                </div>
+                <span class="text-xs font-medium text-gray-400">Average</span>
+            </div>
+            <div class="text-3xl font-bold text-gray-900">KES {{ avg_expenditure | round(0) | format_number }}</div>
+            <div class="text-sm text-gray-500 mt-2">Per transaction</div>
+        </div>
+    </div>
+    
+    <!-- Two Column Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <!-- Recent Transactions -->
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden cool-card animate-slide" style="animation-delay: 0.4s">
+            <div class="border-b border-gray-100 px-6 py-4">
+                <h2 class="text-lg font-semibold text-gray-900">Recent Transactions</h2>
+            </div>
+            <div class="divide-y divide-gray-100">
+                {% for exp in recent_expenditures %}
+                <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-900">{{ exp.description }}</p>
+                            <p class="text-sm text-gray-500 mt-1">{{ exp.date.strftime('%d %b %Y, %H:%M') }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-lg font-semibold text-gray-900">KES {{ exp.amount | format_number }}</p>
+                            <div class="flex gap-2 mt-1 justify-end">
+                                <a href="{{ url_for('main.expenditure_pdf', id=exp.id) }}" class="text-gray-400 hover:text-blue-600 transition">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                    </svg>
+                                </a>
+                                <a href="{{ url_for('main.add_expenditure', edit_id=exp.id) }}" class="text-gray-400 hover:text-yellow-600 transition">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Monthly Chart -->
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden cool-card animate-slide" style="animation-delay: 0.5s">
+            <div class="border-b border-gray-100 px-6 py-4">
+                <h2 class="text-lg font-semibold text-gray-900">Monthly Spending</h2>
+            </div>
+            <div class="p-6">
+                <canvas id="expenditureChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Complete History -->
+    <div class="bg-white rounded-2xl shadow-sm overflow-hidden cool-card animate-slide" style="animation-delay: 0.6s">
+        <div class="border-b border-gray-100 px-6 py-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h2 class="text-lg font-semibold text-gray-900">Complete History</h2>
+                <div class="flex gap-3">
+                    <a href="{{ url_for('main.add_expenditure') }}" 
+                       class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Add New
+                    </a>
+                    <button onclick="window.print()" 
+                            class="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                        </svg>
+                        Print
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+                        <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                        <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                        <th class="text-right py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                        <th class="text-center py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Receipt</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    {% for exp in all_expenditures %}
+                    <tr class="table-row">
+                        <td class="py-4 px-6 text-sm text-gray-500">{{ loop.index }}</td>
+                        <td class="py-4 px-6 text-sm text-gray-900">{{ exp.date.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td class="py-4 px-6 text-sm text-gray-700">{{ exp.description }}</td>
+                        <td class="py-4 px-6 text-right">
+                            <span class="text-sm font-semibold text-gray-900">KES {{ exp.amount | format_number }}</span>
+                        </td>
+                        <td class="py-4 px-6 text-center">
+                            <a href="{{ url_for('main.expenditure_pdf', id=exp.id) }}" 
+                               class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                                </svg>
+                                PDF
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="bg-gray-50 border-t border-gray-200">
+                    <tr>
+                        <td colspan="3" class="py-4 px-6 text-right font-semibold text-gray-900">GRAND TOTAL</td>
+                        <td class="py-4 px-6 text-right">
+                            <span class="text-lg font-bold text-gray-900">KES {{ total_expenditure | format_number }}</span>
+                        </td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const chartData = [
+        {% for trend in expenditure_trends %}
+        { month: "{{ trend.month }}", total: {{ trend.total_amount or 0 }} }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+    
+    const ctx = document.getElementById('expenditureChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: chartData.map(item => item.month),
+            datasets: [{
+                label: 'Spending',
+                data: chartData.map(item => item.total),
+                backgroundColor: '#3b82f6',
+                borderRadius: 8,
+                barPercentage: 0.6,
+                categoryPercentage: 0.8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'KES ' + context.parsed.y.toLocaleString();
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: '#f1f5f9',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return 'KES ' + value.toLocaleString();
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

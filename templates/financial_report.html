@@ -29,27 +29,117 @@
 {% endblock %}
 
 {% block content %}
-<!-- (✅ Your entire HTML content remains unchanged — no issues there) -->
-{{ super() }}
+<div class="container-fluid py-8 px-4 max-w-7xl mx-auto">
+
+    <div class="text-center mb-12">
+        <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent mb-6 animate-pulse">
+            Financial Trends Report
+        </h1>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Track your monthly revenue growth with interactive charts. All data pulled from payment records.
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+
+        <!-- Chart -->
+        <div class="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 animate-float">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-chart-line text-purple-600 mr-3"></i>
+                Revenue Over Time
+            </h2>
+            <div class="w-full h-96">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-table text-emerald-600 mr-3"></i>
+                Figures Per Month
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-200">
+                            <th class="text-left py-4 px-6 font-semibold text-gray-700">Month</th>
+                            <th class="text-right py-4 px-6 font-semibold text-gray-700">Revenue (KES)</th>
+                            <th class="text-right py-4 px-6 font-semibold text-gray-700">Transactions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for trend in payment_trends %}
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                            <td class="py-4 px-6 font-medium text-gray-900">{{ trend.month[5:7] }}/{{ trend.month[:4] }}</td>
+                            <td class="py-4 px-6 text-green-600 font-bold text-right">KES {{ "{:,}".format((trend.total_amount or 0)|int) }}</td>
+                            <td class="py-4 px-6 text-gray-600 font-medium text-right">{{ ((trend.total_amount or 0)|int // 1000) }} tx</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% if recent_payments %}
+    <div class="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8">
+        <h3 class="text-2xl font-bold text-gray-800 mb-6">Recent Payments</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                        <th class="text-left py-4 px-6 font-semibold text-gray-700">Student</th>
+                        <th class="text-left py-4 px-6 font-semibold text-gray-700">Amount</th>
+                        <th class="text-left py-4 px-6 font-semibold text-gray-700">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in recent_payments[-5:] %}
+                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                        <td class="py-4 px-6 font-medium text-gray-900">{{ payment.student_name }}</td>
+                        <td class="py-4 px-6 text-green-600 font-bold">KES {{ "{:,}".format((payment.amount or 0)|int) }}</td>
+                        <td class="py-4 px-6 text-gray-500">{{ payment.date_paid.strftime('%d %b %Y') if payment.date_paid else 'Pending' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Download PDF Button -->
+    <div class="flex justify-center mb-12">
+        <a href="{{ url_for('financial_print') }}" 
+           class="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-10 py-4 rounded-3xl text-xl font-bold shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 flex items-center group">
+            <i class="fas fa-file-pdf mr-3 text-lg group-hover:animate-bounce"></i>
+            📊 Download Monthly Report (PDF)
+        </a>
+    </div>
+
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 
-<!-- ✅ Chart.js (REQUIRED) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    // ✅ SAFE DATA FROM FLASK (fixes all your errors)
-    const trendDataFromServer = {{ [
-        {
-            "month": (trend.month.strftime("%B %Y") if trend.month else "Unknown"),
-            "total": (trend.total_amount or 0)
-        }
-        for trend in payment_trends
-    ] | tojson }};
+const trendDataFromServer = [
+    {% for trend in payment_trends %}
+    {
+        month: "{{ trend.month }}",
+        total: {{ trend.total_amount or 0 }}
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+];
 
-    // ✅ Build chart data cleanly
-    const trendData = {
+const ctx = document.getElementById('trendChart').getContext('2d');
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
         labels: trendDataFromServer.map(item => item.month),
         datasets: [{
             label: 'Monthly Revenue',
@@ -59,45 +149,38 @@
             tension: 0.4,
             fill: true
         }]
-    };
-
-    // ✅ Create chart
-    const ctx = document.getElementById('trendChart').getContext('2d');
-
-    new Chart(ctx, {
-        type: 'line',
-        data: trendData,
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.dataset.label || '';
-                            if (label) label += ': ';
-                            if (context.parsed.y !== null) {
-                                label += 'KES ' + context.parsed.y.toLocaleString();
-                            }
-                            return label;
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        let label = context.dataset.label || '';
+                        if (label) label += ': ';
+                        if (context.parsed.y !== null) {
+                            label += 'KES ' + context.parsed.y.toLocaleString();
                         }
+                        return label;
                     }
                 }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return 'KES ' + value.toLocaleString();
-                        }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return 'KES ' + value.toLocaleString();
                     }
                 }
             }
         }
-    });
+    }
+});
 </script>
 
 {% endblock %}

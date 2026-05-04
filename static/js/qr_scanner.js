@@ -80,7 +80,11 @@ window.startScan = () => {
             console.log('DEBUG: Response data:', result);
             
             if (result.success) {
-                this.showSuccess(result);
+                if (result.already_scanned) {
+                    this.showAlreadyScanned(result);
+                } else {
+                    this.showSuccess(result);
+                }
                 setTimeout(() => {
                     document.getElementById('scan-result').classList.add('result-hidden');
                     this.scanning = true;
@@ -122,6 +126,22 @@ window.startScan = () => {
     showError(message) {
         document.getElementById('result-title').innerHTML = `<i class="fas fa-times-circle text-danger"></i> Scan Error`;
         document.getElementById('result-details').innerHTML = `<div class="alert alert-danger">${message}</div>`;
+        document.getElementById('leadership-count').innerHTML = '';
+    }
+    
+    showAlreadyScanned(data) {
+        const student = data.student;
+        const title = document.getElementById('result-title');
+        const details = document.getElementById('result-details');
+        
+        title.innerHTML = `<i class="fas fa-info-circle text-warning"></i> Already Scanned`;
+        details.innerHTML = `
+            <div class="mb-2">
+                <strong>${student.name}</strong><br>
+                <small class="text-muted">${student.class_name || 'N/A'}</small>
+            </div>
+            <span class="badge bg-warning fs-6">${data.message}</span>
+        `;
         document.getElementById('leadership-count').innerHTML = '';
     }
     

@@ -215,18 +215,25 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center space-x-2">
+                                    <!-- Edit Teacher -->
+                                    <a href="{{ url_for('admin_routes.edit_teacher', teacher_id=teacher.id) }}"
+                                       class="inline-flex items-center px-3 py-1.5 bg-primary text-white text-xs font-medium rounded hover:bg-blue-600 transition-colors duration-200"
+                                       title="Edit teacher">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+
                                     <!-- Send Credentials -->
                                     <form method="POST" action="{{ url_for('admin_routes.send_teacher_credentials', teacher_id=teacher.id) }}" class="inline">
-                                        <button type="submit" 
+                                        <button type="submit"
                                                 class="inline-flex items-center px-3 py-1.5 bg-info text-white text-xs font-medium rounded hover:bg-blue-600 transition-colors duration-200"
                                                 title="Send login credentials">
                                             <i class="fas fa-envelope"></i>
                                         </button>
                                     </form>
-                                    
+
                                     <!-- Toggle Status -->
                                     <form method="POST" action="{{ url_for('admin_routes.toggle_teacher_status', teacher_id=teacher.id) }}" class="inline">
-                                        <button type="submit" 
+                                        <button type="submit"
                                                 class="inline-flex items-center px-3 py-1.5 {% if teacher.active %}bg-warning text-white{% else %}bg-success text-white{% endif %} text-xs font-medium rounded hover:opacity-80 transition-opacity duration-200"
                                                 title="{% if teacher.active %}Deactivate teacher{% else %}Activate teacher{% endif %}">
                                             <i class="fas {% if teacher.active %}fa-user-times{% else %}fa-user-check{% endif %}"></i>

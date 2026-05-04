@@ -69,12 +69,13 @@
     <div class="flex h-screen print-full">
         <!-- Sidebar Overlay for Mobile -->
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
-        
-        <!-- Sidebar -->
+
+        <!-- Sidebar - Hidden for Sub-Admins and Teachers -->
+        {% if session.get('user_type') not in ['SubAdmin', 'Teacher'] %}
         <div class="w-64 bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900 no-print shadow-2xl sidebar" id="sidebar">
             <!-- Logo -->
             <div class="p-6 border-b border-purple-500/20">
-                <a href="{{ url_for('index') }}" class="flex items-center space-x-3 group">
+                <a href="{{ url_for('main.index') }}" class="flex items-center space-x-3 group">
                     <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-purple-500/50 transition-all duration-300 transform group-hover:scale-110">
                         <i class="fas fa-graduation-cap text-white text-lg"></i>
                     </div>
@@ -88,7 +89,7 @@
             <!-- Navigation -->
             <nav class="mt-6 px-4">
                 <div class="space-y-2">
-                    <a href="{{ url_for('index') }}"
+                    <a href="{{ url_for('main.index') }}"
                        class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 transform
                               {% if request.endpoint == 'index' %}
                               bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/30
@@ -107,21 +108,21 @@
                         {% endif %}
                     </a>
 
-                    <a href="{{ url_for('search_students') }}"
+                    <a href="{{ url_for('main.search_students') }}"
                        class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 transform
-                              {% if request.endpoint == 'search_students' %}
+                              {% if request.endpoint == 'main.search_students' %}
                               bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/30
                               {% else %}
                               text-gray-300 hover:bg-white/10 hover:text-white
                               {% endif %}">
                         <i class="fas fa-users w-5 text-center
-                              {% if request.endpoint == 'search_students' %}
+                              {% if request.endpoint == 'main.search_students' %}
                               text-white
                               {% else %}
                               text-purple-400
                               {% endif %}"></i>
                         <span class="ml-3">Students</span>
-                        {% if request.endpoint == 'search_students' %}
+                        {% if request.endpoint == 'main.search_students' %}
                         <div class="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
                         {% endif %}
                     </a>
@@ -147,6 +148,7 @@
                 </div>
             </nav>
         </div>
+        {% endif %}
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
@@ -169,13 +171,18 @@
 
                         <!-- User Menu -->
                         {% if current_user.is_authenticated %}
-                        <div class="relative">
-                            <button class="flex items-center space-x-2 text-gray-600 hover:text-gray-800">
+                        <div class="flex items-center space-x-3">
+                            <div class="flex items-center space-x-2 text-gray-600">
                                 <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                                     <i class="fas fa-user"></i>
                                 </div>
                                 <span class="text-sm font-medium hidden sm:block">{{ current_user.username }}</span>
-                            </button>
+                            </div>
+                            <a href="{{ url_for('admin_routes.admin_logout') }}"
+                               class="flex items-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium">
+                                <i class="fas fa-sign-out-alt mr-2"></i>
+                                Logout
+                            </a>
                         </div>
                         {% endif %}
                     </div>

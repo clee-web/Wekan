@@ -180,7 +180,7 @@
                 Edit Student
             </a>
 
-<a href="{{ url_for('main.student_payment_status') }}" 
+<a href="{{ url_for('main.manage_payments', student_id=student.id) }}" 
                class="inline-flex items-center w-full px-6 py-3 text-sm font-medium text-white 
                       bg-gradient-to-r from-success to-success-dark rounded-lg shadow-soft 
                       hover:from-success-dark hover:to-success hover:translate-y-[-1px] transition-all">
@@ -360,7 +360,7 @@
                 </div>
                 <h3 class="text-xl font-semibold text-gray-900 mb-2">No Payments Recorded</h3>
                 <p class="text-gray-500 mb-6">This student hasn't made any payments yet.</p>
-                <a href="{{ url_for('main.student_payment_status') }}" class="inline-flex items-center px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-primary to-primary-dark rounded-lg shadow-soft hover:translate-y-[-1px] transition-all">
+                <a href="{{ url_for('main.manage_payments', student_id=student.id) }}" class="inline-flex items-center px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-primary to-primary-dark rounded-lg shadow-soft hover:translate-y-[-1px] transition-all">
                     <i class="fas fa-plus mr-2"></i> View Payments
                 </a>
             </div>

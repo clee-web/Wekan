@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Add Expenditure{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100">
+
+  <!-- Page Container -->
+  <div class="max-w-5xl mx-auto px-6 py-10">
+
+    <!-- Header -->
+    <div class="mb-10">
+      <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">
+        Add Expenditure
+      </h1>
+      <p class="text-gray-500 mt-2">
+        Track and manage your business expenses efficiently.
+      </p>
+    </div>
+
+    <!-- Main Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200">
+
+      <!-- Card Header -->
+      <div class="px-8 py-6 border-b border-gray-100">
+        <h2 class="text-lg font-semibold text-gray-800">
+          Expense Details
+        </h2>
+      </div>
+
+      <!-- Form -->
+      <form method="POST" class="px-8 py-6 space-y-6">
+
+        <!-- Grid Layout -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <!-- Date -->
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">
+              Date
+            </label>
+            <input type="date" name="date" id="date" required
+              value="{{ date_default or '' }}"
+              class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+          </div>
+
+          <!-- Amount -->
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">
+              Amount (KES)
+            </label>
+            <input type="number" name="amount" step="0.01" min="0" required
+              placeholder="0.00"
+              class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+          </div>
+
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-sm font-medium text-gray-600 mb-2">
+            Description
+          </label>
+          <textarea name="description" rows="4" required
+            placeholder="Describe the expense..."
+            class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition resize-none"></textarea>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+
+          <!-- Secondary -->
+          <a href="{{ url_for('main.index') }}"
+             class="text-sm text-gray-500 hover:text-gray-700 transition">
+            ← Cancel
+          </a>
+
+          <!-- Primary -->
+          <button type="submit"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-6 py-3 rounded-xl shadow-sm hover:shadow-md transition-all duration-200">
+            Save Expenditure
+          </button>
+
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+
+      <!-- Card 1 -->
+      <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+        <p class="text-sm text-gray-500">Total Spent</p>
+        <p class="text-2xl font-semibold text-gray-900 mt-2">
+          KES {{ "{:,}".format((total_expenditure or 0)|int) }}
+        </p>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+        <p class="text-sm text-gray-500">Total Records</p>
+        <p class="text-2xl font-semibold text-gray-900 mt-2">
+          {{ expenditure_count or 0 }}
+        </p>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-500">Reports</p>
+          <p class="text-sm text-gray-700 mt-1">View insights</p>
+        </div>
+        <a href="{{ url_for('main.expenditure_report') }}"
+           class="text-indigo-600 hover:text-indigo-700 text-sm font-medium">
+          Open →
+        </a>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const dateInput = document.getElementById('date');
+  if (!dateInput.value) {
+    dateInput.valueAsDate = new Date();
+  }
+});
+</script>
+
+{% endblock %}

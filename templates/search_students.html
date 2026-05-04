@@ -33,7 +33,7 @@
           <p class="text-blue-100 text-lg">Search and manage student records</p>
         </div>
         <div class="text-center md:text-right">
-          <a href="{{ url_for('add_student') }}" class="inline-flex items-center px-6 py-3 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-all duration-300 shadow-sm hover:shadow-md">
+          <a href="{{ url_for('main.add_student') }}" class="inline-flex items-center px-6 py-3 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 transition-all duration-300 shadow-sm hover:shadow-md">
             <i class="fas fa-plus mr-2"></i>
             Add New Student
           </a>
@@ -140,21 +140,23 @@
         </div>
 
         <div class="mt-6 flex items-center justify-between">
-          <a href="{{ url_for('view_student', student_id=student.id) }}"
+          <a href="{{ url_for('main.view_student', student_id=student.id) }}"
              class="inline-flex items-center text-sm font-medium text-primary hover:text-primary-light">
             View Details
             <i class="fas fa-arrow-right ml-2"></i>
           </a>
           <div class="flex items-center space-x-2">
-            <a href="{{ url_for('manage_payments', student_id=student.id) }}"
+            <a href="{{ url_for('main.edit_student', student_id=student.id) }}"
                class="inline-flex items-center p-2 text-sm font-medium text-gray-700 hover:text-primary
-                      rounded-full hover:bg-gray-100">
-              <i class="fas fa-money-bill"></i>
-            </a>
-            <a href="{{ url_for('edit_student', student_id=student.id) }}"
-               class="inline-flex items-center p-2 text-sm font-medium text-gray-700 hover:text-primary
-                      rounded-full hover:bg-gray-100">
+                      rounded-full hover:bg-gray-100"
+               title="Edit Student">
               <i class="fas fa-edit"></i>
+            </a>
+            <a href="{{ url_for('main.manage_payments', student_id=student.id) }}"
+               class="inline-flex items-center p-2 text-sm font-medium text-gray-700 hover:text-green-600
+                      rounded-full hover:bg-gray-100"
+               title="Manage Payments">
+              <i class="fas fa-credit-card"></i>
             </a>
           </div>
         </div>
@@ -175,7 +177,7 @@
     <h3 class="text-lg font-medium text-gray-900 mb-2">No Students Yet</h3>
     <p class="text-gray-500">Start by adding your first student.</p>
     <div class="mt-6">
-      <a href="{{ url_for('add_student') }}"
+      <a href="{{ url_for('main.add_student') }}"
          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium
                 rounded-md shadow-sm text-white bg-primary hover:bg-primary-light">
         <i class="fas fa-plus mr-2"></i>
@@ -191,14 +193,14 @@
   <div class="flex items-center justify-between bg-white px-4 py-3 sm:px-6 rounded-lg shadow">
     <div class="flex flex-1 justify-between sm:hidden">
       {% if pagination.has_prev %}
-      <a href="{{ url_for('search_students', page=pagination.prev_num, search=request.args.get('search', ''), show_inactive=request.args.get('show_inactive', '')) }}"
+      <a href="{{ url_for('main.search_students', page=pagination.prev_num, search=request.args.get('search', ''), show_inactive=request.args.get('show_inactive', '')) }}"
          class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md
                 text-gray-700 bg-white hover:bg-gray-50">
         Previous
       </a>
       {% endif %}
       {% if pagination.has_next %}
-      <a href="{{ url_for('search_students', page=pagination.next_num, search=request.args.get('search', ''), show_inactive=request.args.get('show_inactive', '')) }}"
+      <a href="{{ url_for('main.search_students', page=pagination.next_num, search=request.args.get('search', ''), show_inactive=request.args.get('show_inactive', '')) }}"
          class="relative ml-3 inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium
                 rounded-md text-gray-700 bg-white hover:bg-gray-50">
         Next
@@ -214,7 +216,7 @@
       <div>
         <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
           {% if pagination.has_prev %}
-          <a href="{{ url_for('search_students', page=pagination.prev_num, search=request.args.get('search', ''), show_inactive=request.args.get('show_inactive', '')) }}"
+          <a href="{{ url_for('main.search_students', page=pagination.prev_num, search=request.args.get('search', ''), show_inactive=request.args.get('show_inactive', '')) }}"
              class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset
                     ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
             <i class="fas fa-chevron-left"></i>
@@ -224,7 +226,7 @@
           {% for page in pagination.iter_pages() %}
             {% if page %}
               {% if page != pagination.page %}
-              <a href="{{ url_for('search_students', page=page, search=request.args.get('search', ''), show_inactive=request.args.get('show_inactive', '')) }}"
+              <a href="{{ url_for('main.search_students', page=page, search=request.args.get('search', ''), show_inactive=request.args.get('show_inactive', '')) }}"
                  class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900
                         ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
                 {{ page }}
@@ -245,7 +247,7 @@
           {% endfor %}
 
           {% if pagination.has_next %}
-          <a href="{{ url_for('search_students', page=pagination.next_num, search=request.args.get('search', ''), show_inactive=request.args.get('show_inactive', '')) }}"
+          <a href="{{ url_for('main.search_students', page=pagination.next_num, search=request.args.get('search', ''), show_inactive=request.args.get('show_inactive', '')) }}"
              class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset
                     ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
             <i class="fas fa-chevron-right"></i>

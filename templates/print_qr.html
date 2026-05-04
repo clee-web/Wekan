@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student QR - {{ student.name }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: white;
+            width: 100%;
+            min-height: 100vh;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .qr-card {
+            width: 35mm;
+            height: 45mm;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ccc;
+            border-radius: 2mm;
+            padding: 1mm;
+            margin-top: 10mm;
+        }
+
+        .qr-image {
+            width: 25mm;
+            height: 25mm;
+            object-fit: contain;
+            margin-bottom: 1mm;
+        }
+
+        .student-name {
+            font-size: 8pt;
+            font-weight: bold;
+            text-align: center;
+            color: #333;
+            word-wrap: break-word;
+            max-width: 30mm;
+            line-height: 1.1;
+        }
+
+        .student-id {
+            font-size: 6pt;
+            color: #666;
+            margin-top: 0.5mm;
+        }
+
+        .class-name {
+            font-size: 6pt;
+            color: #666;
+            margin-top: 0.5mm;
+        }
+
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="qr-card">
+        <img src="{{ url_for('qr_routes.generate_student_qr', student_id=student.id) }}" alt="QR Code" class="qr-image">
+        <div class="student-name">{{ student.name }}</div>
+        <div class="student-id">ID: {{ student.id }}</div>
+        {% if student.class_name %}
+        <div class="class-name">{{ student.class_name }}</div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Auto-print on load
+        window.onload = function() {
+            window.print();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Expenditure Receipt</title>
+
+  <style>
+    @page {
+      size: A4;
+      margin: 10mm;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 10mm;
+      color: #333;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    /* HEADER */
+    .header {
+      text-align: center;
+      border-bottom: 2px solid #e74c3c;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+
+    .company-name {
+      font-size: 20px;
+      font-weight: bold;
+      margin: 0;
+    }
+
+    .company-details {
+      font-size: 11px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .receipt-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 10px;
+      letter-spacing: 1px;
+    }
+
+    /* DETAILS GRID */
+    .receipt-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 15px;
+      background: #f7f7f7;
+      padding: 12px;
+      border-radius: 10px;
+    }
+
+    .section-title {
+      font-weight: bold;
+      font-size: 13px;
+      margin-bottom: 8px;
+      color: #2c3e50;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+
+    .label {
+      font-weight: 600;
+      color: #555;
+    }
+
+    .value {
+      font-weight: 500;
+      color: #222;
+      text-align: right;
+    }
+
+    /* AMOUNT */
+    .amount {
+      font-size: 22px;
+      font-weight: bold;
+      color: #e74c3c;
+      text-align: right;
+      margin-top: 10px;
+    }
+
+    /* SIGNATURE */
+    .signature-section {
+      margin-top: 20px;
+      border-top: 1px dashed #aaa;
+      padding-top: 12px;
+    }
+
+    .sign-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-top: 10px;
+    }
+
+    .signature-line {
+      border-bottom: 1px solid #333;
+      height: 30px;
+      margin-bottom: 5px;
+    }
+
+    .sig-label {
+      font-size: 11px;
+      color: #777;
+      text-align: center;
+    }
+
+    /* FOOTER */
+    .footer {
+      text-align: center;
+      font-size: 10px;
+      margin-top: 15px;
+      color: #888;
+      border-top: 1px solid #eee;
+      padding-top: 8px;
+    }
+
+    /* PRINT OPTIMIZATION */
+    @media print {
+      body {
+        -webkit-print-color-adjust: exact;
+        transform: scale(0.98);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="company-name">IYF FREE WEEKEND ACADEMY</div>
+    <div class="company-details">
+      P.O Box XXX | Tel: 07XX XXX XXX | Email: info@iyf.ac.ke
+    </div>
+    <div class="receipt-title">EXPENDITURE RECEIPT</div>
+    <div style="font-size:11px; margin-top:5px;">
+      Receipt #{{ expenditure.id }} | {{ print_date }}
+    </div>
+  </div>
+
+  <!-- DETAILS -->
+  <div class="receipt-details">
+
+    <!-- LEFT -->
+    <div>
+      <div class="section-title">Expense Info</div>
+
+      <div class="detail-row">
+        <span class="label">ID</span>
+        <span class="value">EXP-{{ '%04d' % expenditure.id }}</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="label">Date</span>
+        <span class="value">{{ expenditure.date.strftime('%d %b %Y %H:%M') }}</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="label">Description</span>
+        <span class="value">{{ expenditure.description }}</span>
+      </div>
+
+      <div class="amount">
+        KES {{ expenditure.amount | format_number }}
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div>
+      <div class="section-title">Payment Info</div>
+
+      <div class="detail-row">
+        <span class="label">User</span>
+        <span class="value">{{ current_user.username or 'Admin' }}</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="label">Method</span>
+        <span class="value">Cash / M-PESA</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="label">Reference</span>
+        <span class="value">EXP-{{ expenditure.id }}-{{ expenditure.date.strftime('%Y%m%d') }}</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="label">Status</span>
+        <span class="value" style="color:green;font-weight:bold;">PAID</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SIGNATURE -->
+  <div class="signature-section">
+    <div class="section-title" style="text-align:center;">Approval</div>
+
+    <div class="sign-grid">
+
+      <div>
+        <div class="signature-line"></div>
+        <div class="sig-label">Accountant Signature</div>
+      </div>
+
+      <div>
+        <div class="signature-line"></div>
+        <div class="sig-label">Admin Signature</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    Computer generated receipt • IYF Free Weekend Academy
+  </div>
+
+  <script>
+    window.onload = () => window.print();
+  </script>
+
+</body>
+</html>

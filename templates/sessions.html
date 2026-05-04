@@ -24,7 +24,7 @@
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
     <!-- Primary Action -->
     <div class="lg:col-span-2">
-      <a href="{{ url_for('add_session') }}" 
+      <a href="{{ url_for('main.index') }}" 
          class="group bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 
                 text-white font-bold py-6 px-8 rounded-2xl shadow-2xl hover:shadow-3xl 
                 hover:-translate-y-2 focus:ring-4 focus:ring-emerald-300 
@@ -125,7 +125,7 @@
               {{ session.created_at.strftime('%b %d, %Y') }}
             </td>
             <td class="px-8 py-6 whitespace-nowrap text-right text-sm font-medium space-x-2">
-              <a href="{{ url_for('edit_session', session_id=session.id) }}" 
+              <a href="{{ url_for('main.index') }}" 
                  class="inline-flex items-center px-4 py-2 border border-indigo-300 
                         text-indigo-700 bg-indigo-50 hover:bg-indigo-100 
                         text-sm font-semibold rounded-xl transition-all duration-200 
@@ -139,7 +139,7 @@
                 Currently Active
               </span>
               {% else %}
-              <form action="{{ url_for('delete_session', session_id=session.id) }}" 
+              <form action="{{ url_for('main.index') }}" 
                     method="POST" class="inline" 
                     onsubmit="return confirm('Delete {{ session.name }}? This cannot be undone.');">
                 <button type="submit" 
@@ -168,7 +168,7 @@
     <p class="text-lg text-gray-600 mb-8 max-w-md mx-auto">
       Get started by creating your first academic session. Sessions help organize students and track progress.
     </p>
-    <a href="{{ url_for('add_session') }}" 
+    <a href="{{ url_for('main.index') }}" 
        class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 
               text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl 
               hover:-translate-y-1 transition-all duration-300 text-lg">

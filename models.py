@@ -118,7 +118,7 @@ class Payment(db.Model):
                 print(f"DRY-RUN: Keep ID {maxid}, delete {cnt-1} duplicates for student {s_id} on {p_date} ({p_type}, KSh{amt:.2f})")
             else:
                 deleted = db.session.query(cls).filter(
-                    and_(
+                db.and_(
                         cls.student_id == s_id,
                         func.date(cls.date) == p_date,
                         cls.payment_type == p_type,
@@ -254,6 +254,27 @@ class Admin(UserMixin, db.Model):
             # Hash method not supported (e.g., scrypt), password needs reset
             return False
 
+# SubAdmin model for sub-admin authentication with limited permissions
+class SubAdmin(UserMixin, db.Model):
+    __tablename__ = 'sub_admin'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), unique=True, nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
+    email = db.Column(db.String(100), nullable=True)
+    full_name = db.Column(db.String(100), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_by = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=True)  # Which main admin created this sub-admin
+    active = db.Column(db.Boolean, default=True)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        try:
+            return check_password_hash(self.password_hash, password)
+        except ValueError:
+            return False
+
 
 class TeacherLogin(UserMixin, db.Model):
     __tablename__ = 'teacher_login'
@@ -273,3 +294,21 @@ class TeacherLogin(UserMixin, db.Model):
         except ValueError:
             # Hash method not supported (e.g., scrypt), password needs reset
             return False
+
+
+class Expenditure(db.Model):
+    """Model for expenditure/expenses tracking."""
+    __tablename__ = 'expenditure'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    description = db.Column(db.String(200), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    created_by = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    admin = db.relationship('Admin', backref='expenditures')
+    
+    def __repr__(self):
+        return f'<Expenditure {self.description} KES{self.amount} on {self.date}>'
+

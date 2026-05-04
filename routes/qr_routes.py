@@ -1,19 +1,43 @@
-from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash
-from models import db, Student, Attendance
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash, session, send_file
+from flask_login import login_required, current_user
+from models import db, Student, Attendance, SubAdmin
 from datetime import datetime, date, timedelta
 from sqlalchemy import func, and_
 import uuid
 import re
+import qrcode
+from io import BytesIO
 
 qr_routes = Blueprint('qr_routes', __name__, template_folder='../templates', static_folder='../static')
 
 @qr_routes.route('/qr_attendance')
+@login_required
 def qr_attendance_page():
-    """QR Scanner page - public access for students to scan"""
+    """QR Scanner page - accessible by admins and sub-admins for leadership class"""
     students = Student.query.filter_by(active=True).limit(10).all()  # Sample for testing
     return render_template('qr_attendance.html', students=students)
 
+@qr_routes.route('/generate_student_qr/<int:student_id>')
+@login_required
+def generate_student_qr(student_id: int):
+    """
+    Return a PNG QR code for the student.
+
+    QR payload format is aligned with `scan_qr()`:
+    'IYF-Student:{id}-{name}'
+    """
+    student = Student.query.get_or_404(student_id)
+    qr_data = f"IYF-Student:{student.id}-{student.name}"
+
+    img = qrcode.make(qr_data)
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+
+    return send_file(buf, mimetype="image/png", download_name=f"student_{student.id}_qr.png")
+
 @qr_routes.route('/scan_qr', methods=['POST'])
+@login_required
 def scan_qr():
     """Process QR scan - extract student ID, mark attendance, check leadership absences"""
     try:
@@ -37,9 +61,9 @@ def scan_qr():
         student = Student.query.get(student_id)
         if not student:
             return jsonify({'error': 'Student not found'}), 404
-        
-        if scanned_name != student.name:
-            return jsonify({'error': 'Name mismatch - possible fake QR'}), 403
+
+        # Name check removed to allow class changes without affecting QR
+        # Only student ID is verified
         
         today = date.today()
         weekday = today.weekday()  # 5=Sat, 6=Sun
@@ -65,8 +89,10 @@ def scan_qr():
         
         if existing:
             return jsonify({
-                'message': f'Already marked {existing.status} for {session_type} today',
-                'student': {'id': student.id, 'name': student.name, 'active': student.active}
+                'success': True,
+                'already_scanned': True,
+                'message': f'Already scanned - {student.name} marked {existing.status} for {session_type} today',
+                'student': {'id': student.id, 'name': student.name, 'class_name': student.class_name, 'active': student.active}
             })
         
         # Mark present via QR scan

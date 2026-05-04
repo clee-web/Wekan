@@ -131,18 +131,30 @@
 
                     <!-- Session Type Controls -->
                     <div class="mt-6 flex justify-center">
+                        {% if session.get('user_type') == 'SubAdmin' %}
+                        <!-- Sub-admins only see Leadership button -->
                         <div class="inline-flex rounded-lg border border-gray-200 bg-white shadow-sm" role="group">
-                            <button id="class-btn" onclick="setSessionType('class')" 
+                            <button id="leadership-btn" onclick="setSessionType('leadership')"
+                                    class="px-6 py-3 text-sm font-medium text-white bg-primary hover:bg-secondary rounded-lg transition-colors duration-200 focus:z-10 focus:outline-none focus:ring-2 focus:ring-primary">
+                                <i class="fas fa-crown mr-2"></i>
+                                Leadership
+                            </button>
+                        </div>
+                        {% else %}
+                        <!-- Admins see both buttons -->
+                        <div class="inline-flex rounded-lg border border-gray-200 bg-white shadow-sm" role="group">
+                            <button id="class-btn" onclick="setSessionType('class')"
                                     class="px-6 py-3 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 rounded-l-lg border-r border-gray-200 transition-colors duration-200 focus:z-10 focus:outline-none focus:ring-2 focus:ring-primary">
                                 <i class="fas fa-graduation-cap mr-2"></i>
                                 Class
                             </button>
-                            <button id="leadership-btn" onclick="setSessionType('leadership')" 
+                            <button id="leadership-btn" onclick="setSessionType('leadership')"
                                     class="px-6 py-3 text-sm font-medium text-white bg-primary hover:bg-secondary rounded-r-lg transition-colors duration-200 focus:z-10 focus:outline-none focus:ring-2 focus:ring-primary">
                                 <i class="fas fa-crown mr-2"></i>
                                 Leadership
                             </button>
                         </div>
+                        {% endif %}
                     </div>
 
                     <!-- Results Display -->
@@ -204,7 +216,7 @@
                     Test QR Code
                 </h3>
                 <p class="text-sm text-gray-600 mb-4">Generate a test QR code for testing the scanner</p>
-                <a href="{{ url_for('generate_student_qr', student_id=1) }}" 
+                <a href="{{ url_for('qr_routes.generate_student_qr', student_id=1) }}" 
                    target="_blank" 
                    class="w-full inline-flex items-center justify-center px-4 py-3 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
                     <i class="fas fa-qrcode mr-2"></i>
@@ -308,7 +320,11 @@
         }
     }
     
-    // Initialize session type
+    // Initialize session type - leadership for sub-admins, class for admins
+    {% if session.get('user_type') == 'SubAdmin' %}
+    setSessionType('leadership');
+    {% else %}
     setSessionType('class');
+    {% endif %}
 </script>
 {% endblock %}

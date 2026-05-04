@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Merge Classes{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-7xl">
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-gray-900 mb-2">Merge Classes</h1>
+    <p class="text-lg text-gray-600">Combine duplicate or similar class names into standardized names</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Current Classes -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Current Classes</h2>
+      <p class="text-sm text-gray-600 mb-4">Select classes to merge into a target class</p>
+      
+      <form method="POST" action="{{ url_for('admin_routes.merge_classes') }}">
+        <div class="mb-6">
+          <label class="block text-sm font-bold text-gray-700 mb-3">Target Class (merge into this)</label>
+          <select name="target_class" required
+                  class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all duration-300 bg-white">
+            <option value="">Select target class</option>
+            {% for class_name in standard_classes %}
+            <option value="{{ class_name }}">{{ class_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm font-bold text-gray-700 mb-3">Classes to Merge</label>
+          <div class="max-h-96 overflow-y-auto border border-gray-200 rounded-xl p-4">
+            {% for class_name, count in class_stats %}
+            <div class="flex items-center mb-2">
+              <input type="checkbox" name="classes_to_merge" value="{{ class_name }}" id="class_{{ loop.index }}"
+                     class="w-4 h-4 text-purple-600 rounded focus:ring-purple-500">
+              <label for="class_{{ loop.index }}" class="ml-3 flex-1 text-sm text-gray-700">
+                {{ class_name }}
+                <span class="text-gray-500 ml-2">({{ count }} students)</span>
+              </label>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <button type="submit"
+                onclick="return confirm('Are you sure you want to merge the selected classes? This action cannot be undone.')"
+                class="w-full bg-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-purple-700 transition-colors duration-300 shadow-lg hover:shadow-xl">
+          <i class="fas fa-compress-arrows-alt mr-2"></i>
+          Merge Classes
+        </button>
+      </form>
+
+      <form method="POST" action="{{ url_for('admin_routes.auto_fix_classes') }}" class="mt-4">
+        <button type="submit"
+                onclick="return confirm('This will automatically fix all known typos in class names. Continue?')"
+                class="w-full bg-green-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-green-700 transition-colors duration-300 shadow-lg hover:shadow-xl">
+          <i class="fas fa-magic mr-2"></i>
+          Auto-Fix All Typos
+        </button>
+      </form>
+    </div>
+
+    <!-- Standard Classes Reference -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Standard Class Names</h2>
+      <p class="text-sm text-gray-600 mb-4">These are the approved standardized class names</p>
+      
+      <div class="space-y-4">
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-2">Computer Courses</h3>
+          <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+            <li>Computer Packages</li>
+            <li>Computer Programming</li>
+            <li>AI for Web Design</li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-2">Beauty & Hairdressing</h3>
+          <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+            <li>Beauty and Hairdressing</li>
+            <li>Hairdressing and Beauty Therapy</li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-2">Healthcare</h3>
+          <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+            <li>Caregiver</li>
+            <li>Paramedics</li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-2">Technical</h3>
+          <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+            <li>Electrical Installation</li>
+            <li>Plumbing</li>
+            <li>Refrigeration</li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-2">Hospitality</h3>
+          <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+            <li>Food and Beverage</li>
+            <li>Hospitality</li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-2">Languages</h3>
+          <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+            <li>Sign Language</li>
+            <li>French</li>
+            <li>German</li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-2">Other Skills</h3>
+          <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+            <li>Digital Marketing</li>
+            <li>Videography</li>
+            <li>Tailoring</li>
+            <li>Taekwondo</li>
+            <li>Music Instrumentals</li>
+            <li>Smart Agriculture</li>
+            <li>Barbering</li>
+            <li>Theology</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

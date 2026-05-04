@@ -360,7 +360,7 @@
             <div class="text-center mt-8 mb-8">
                 <h3 class="text-lg font-semibold mb-4 text-gray-800">Student Verification QR</h3>
                 <div class="qr-container mx-auto bg-white p-4 rounded-lg shadow-md border inline-block">
-                    <img src="/generate_qr/student/{{ student.id }}" 
+                    <img src="{{ url_for('qr_routes.generate_student_qr', student_id=student.id) }}" 
                          alt="Student QR Code" 
                          class="w-32 h-32 mx-auto block object-contain">
                     <p class="text-xs text-gray-500 mt-2">Scan to verify transcript</p>
@@ -374,7 +374,7 @@
     <button id="download-pdf" class="btn btn-primary">
         <i class="fas fa-file-download mr-2"></i>Download as PDF
     </button>
-    <a href="{{ url_for('view_student', student_id=student.id) }}" class="btn btn-secondary">
+    <a href="{{ url_for('main.view_student', student_id=student.id) }}" class="btn btn-secondary">
         <i class="fas fa-arrow-left mr-2"></i>Back to Student
     </a>
 </div>

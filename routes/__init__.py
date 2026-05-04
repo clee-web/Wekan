@@ -32,7 +32,7 @@ GRADUATION_FEE_TOTAL = 1000.00 # KES 1000 as per requirements
 
 # --- Routes ---
 
-@main_routes.route('/teachers', endpoint='teachers')
+@main_routes.route('/teachers')
 @login_required
 def teachers():
     """Serves the teachers management page."""

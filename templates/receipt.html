@@ -67,7 +67,7 @@
             <div class="text-center mb-8">
                 <h3 class="text-lg font-semibold mb-4 text-gray-800">Student Verification QR</h3>
                 <div class="qr-container mx-auto bg-white p-4 rounded-lg shadow-md border inline-block">
-                    <img src="/generate_qr/student/{{ student.id }}" 
+                    <img src="{{ url_for('qr_routes.generate_student_qr', student_id=student.id) }}" 
                          alt="Student QR Code" 
                          class="w-32 h-32 mx-auto block object-contain">
                     <p class="text-xs text-gray-500 mt-2">Scan to verify student</p>
@@ -87,7 +87,7 @@
                         class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                     Print Receipt
                 </button>
-                <a href="{{ url_for('manage_payments', student_id=student.id) }}" 
+                <a href="{{ url_for('main.manage_payments', student_id=student.id) }}" 
                    class="text-blue-500 hover:text-blue-700">
                     Back to Payments
                 </a>

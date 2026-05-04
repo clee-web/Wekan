@@ -130,11 +130,31 @@
 {% block content %}
     <div class="container mx-auto px-4 py-8">
         <div class="flex justify-end mb-4">
-            <a href="/add_student" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition">
+            <a href="{{ url_for('main.add_student') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition">
                 <i class="fas fa-user-plus mr-2"></i> Add New Student
             </a>
         </div>
         <div class="max-w-4xl mx-auto">
+            <!-- Print QR Button -->
+            <a href="{{ url_for('main.print_student_qr', student_id=student.id) }}" target="_blank"
+               class="block bg-white rounded-lg shadow-soft p-6 mb-6 hover:shadow-lg transition-shadow cursor-pointer no-underline">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                            <i class="fas fa-qrcode text-xl text-purple-600"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-800">Print Student QR</h2>
+                            <p class="text-sm text-gray-500">Generate passport-size QR for {{ student.name }}</p>
+                        </div>
+                    </div>
+                    <div class="inline-flex items-center px-6 py-3 bg-purple-600 text-white font-medium rounded-lg">
+                        <i class="fas fa-print mr-2"></i>
+                        Print QR
+                    </div>
+                </div>
+            </a>
+
             <!-- M-PESA Payment Modal -->
             <div id="mpesaPaymentModal">
                 <div class="modal-content">
@@ -204,13 +224,12 @@
                     </div>
                     <div>
                         <label for="payment_type" class="form-label">Payment Type</label>
-                        <select id="payment_type" name="payment_type" 
+                        <select id="payment_type" name="payment_type"
                                 class="form-select"
                                 required>
                             <option value="">Select Payment Type</option>
                             <option value="Passport Fee">Passport Fee</option>
                             <option value="Graduation Fee">Graduation Fee</option>
-                            <option value="Transport Fee">Transport Fee</option>
                         </select>
                     </div>
                     <div>
@@ -231,9 +250,9 @@
                     </button>
                 </form>
                 
-                <form action=\"{{ url_for('remove_duplicates', student_id=student.id) }}\" method=\"POST\" class=\"mt-4\" onsubmit=\"return confirm('Remove duplicate payments? This keeps newest and deletes older identical ones.')\">
-                    <button type=\"submit\" class=\"w-full py-2 px-4 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center\">
-                        <i class=\"fas fa-copy mr-2\"></i>
+                <form action="{{ url_for('main.remove_duplicates', student_id=student.id) }}" method="POST" class="mt-4" onsubmit="return confirm('Remove duplicate payments? This keeps newest and deletes older identical ones.')">
+                    <button type="submit" class="w-full py-2 px-4 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center">
+                        <i class="fas fa-copy mr-2"></i>
                         Remove Duplicate Payments ({{ student.id }})
                     </button>
                 </form>
@@ -298,12 +317,12 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex space-x-2">
-                                        <a href="{{ url_for('view_receipt', payment_id=payment.id) }}"
+                                        <a href="{{ url_for('main.view_receipt', payment_id=payment.id) }}"
                                            class="inline-flex items-center text-sm text-primary hover:text-primary-dark transition-colors duration-200">
                                             <i class="fas fa-receipt mr-1"></i>
                                             View Receipt
                                         </a>
-                                        <form action="{{ url_for('delete_payment', payment_id=payment.id) }}" 
+                                        <form action="{{ url_for('main.delete_payment', payment_id=payment.id) }}" 
                                               method="POST" 
                                               class="inline-flex items-center"
                                               onsubmit="return confirm('Are you sure you want to delete this payment?');">

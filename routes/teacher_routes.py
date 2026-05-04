@@ -37,12 +37,13 @@ def teacher_login():
                 login.set_password(password)
                 db.session.commit()
                 print(f"[DEBUG] Teacher password hash updated to supported algorithm")
-        if login and login.check_password(password):
+        if login and login.teacher.active and login.check_password(password):
             print("Password check succeeded")
             login_user(login)
             # Set session to permanent to ensure it persists
             from flask import session as flask_session
             flask_session.permanent = True
+            flask_session['user_type'] = 'Teacher'
             print(f"Logged in user: {login.teacher.name}")
             return redirect(url_for('teacher_routes.teacher_dashboard'))
         else:
@@ -114,8 +115,9 @@ def teacher_logout():
 @teacher_routes.route('/teacher/dashboard')
 @teacher_login_required
 def teacher_dashboard():
-    # Get teacher's assigned class
-    teacher_class = current_user.teacher.class_name if current_user.teacher else None
+    # Get teacher's assigned class safely
+    teacher = getattr(current_user, 'teacher', None)
+    teacher_class = teacher.class_name if teacher else None
 
     # Filter students by teacher's assigned class
     if teacher_class:
@@ -137,8 +139,9 @@ def class_students(class_name):
     print(f"[DEBUG] current_user.id={getattr(current_user, 'id', None)}")
     print(f"[DEBUG] current_user type={type(current_user)}")
 
-    # Get teacher's assigned class
-    teacher_class = current_user.teacher.class_name if current_user.teacher else None
+    # Get teacher's assigned class safely
+    teacher = getattr(current_user, 'teacher', None)
+    teacher_class = teacher.class_name if teacher else None
 
     # Verify teacher can access this class
     if teacher_class and class_name != teacher_class:
@@ -172,8 +175,9 @@ def class_students(class_name):
 def mark_attendance(student_id):
     student = Student.query.get_or_404(student_id)
 
-    # Get teacher's assigned class
-    teacher_class = current_user.teacher.class_name if current_user.teacher else None
+    # Get teacher's assigned class safely
+    teacher = getattr(current_user, 'teacher', None)
+    teacher_class = teacher.class_name if teacher else None
 
     # Verify student is in teacher's assigned class
     if teacher_class and student.class_name != teacher_class:
@@ -210,8 +214,9 @@ def mark_attendance(student_id):
 @teacher_routes.route('/teacher/students')
 @teacher_login_required
 def view_students():
-    # Get teacher's assigned class
-    teacher_class = current_user.teacher.class_name if current_user.teacher else None
+    # Get teacher's assigned class safely
+    teacher = getattr(current_user, 'teacher', None)
+    teacher_class = teacher.class_name if teacher else None
 
     # Filter students by teacher's assigned class
     if teacher_class:
@@ -227,8 +232,9 @@ def view_students():
 def view_student_detail(student_id):
     student = Student.query.get_or_404(student_id)
 
-    # Get teacher's assigned class
-    teacher_class = current_user.teacher.class_name if current_user.teacher else None
+    # Get teacher's assigned class safely
+    teacher = getattr(current_user, 'teacher', None)
+    teacher_class = teacher.class_name if teacher else None
 
     # Verify student is in teacher's assigned class
     if teacher_class and student.class_name != teacher_class:
@@ -255,8 +261,9 @@ def update_student_name(student_id):
 @teacher_routes.route('/teacher/mark_attendance', methods=['GET', 'POST'])
 @teacher_login_required
 def mark_attendance_bulk():
-    # Get teacher's assigned class
-    teacher_class = current_user.teacher.class_name if current_user.teacher else None
+        # Get teacher's assigned class safely
+    teacher = getattr(current_user, 'teacher', None)
+    teacher_class = teacher.class_name if teacher else None
 
     if request.method == 'POST':
         data = request.json
@@ -434,9 +441,8 @@ def teacher_scan_qr():
         if teacher_class and student.class_name != teacher_class:
             return jsonify({'error': f'Student {student.name} is not in your assigned class ({teacher_class}). Student is in {student.class_name}'}), 403
 
-        # Verify name matches (optional, for security)
-        if scanned_name.lower() != student.name.lower():
-            return jsonify({'error': f'Name mismatch. Scanned: {scanned_name}, Database: {student.name}'}), 403
+        # Name check removed to allow class changes without affecting QR
+        # Only student ID is verified
 
         if not student.active:
             return jsonify({'error': f'Student {student.name} is not active'}), 403
@@ -453,7 +459,9 @@ def teacher_scan_qr():
         
         if existing:
             return jsonify({
-                'message': f'Already marked {existing.status} for {student.name} today',
+                'success': True,
+                'already_scanned': True,
+                'message': f'Already scanned - {student.name} marked {existing.status} today',
                 'student': {
                     'id': student.id,
                     'name': student.name,
