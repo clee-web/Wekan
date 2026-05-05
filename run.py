@@ -16,10 +16,15 @@ try:
     print("[START] Server: http://127.0.0.1:5000")
     print("[LOGIN] admin / adminiyf")
     
-    # Create tables if needed
+    # Create tables only if database is empty (migration preferred)
     with app.app_context():
-        db.create_all()
-        print("[OK] Database ready")
+        inspector = db.inspect(db.engine)
+        if not inspector.has_table('teacher_login'):
+            db.create_all()
+            print("[OK] Database tables created (fresh DB)")
+        else:
+            print("[OK] Database exists - migrations should be used for schema changes")
+
     
     app.run(host='0.0.0.0', port=5000, debug=True)
     

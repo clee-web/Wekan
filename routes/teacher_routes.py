@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, current_app
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, current_app, session
 from flask_login import login_user, login_required, logout_user, current_user
 from flask_mail import Message
 from models import Teacher, TeacherLogin, Attendance, ExamResult, Student, db
@@ -16,40 +16,76 @@ def teacher_login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated:
-            flash('Please login to access this page.', 'warning')
+            flash('Please login to access this page.', 'error')
             return redirect(url_for('teacher_routes.teacher_login', next=request.url))
         return f(*args, **kwargs)
     return decorated_function
 
 @teacher_routes.route('/teacher/login', methods=['GET', 'POST'])
 def teacher_login():
+    next_url = request.args.get('next') or url_for('teacher_routes.teacher_dashboard')
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        print(f"Login attempt: username={username}")
-        
+        print(f"[TEACHER LOGIN] Attempt for username='{username}' from {request.referrer}")
+
         login = TeacherLogin.query.filter_by(username=username).first()
-        if login:
-            print(f"Found login record for username={username}")
-            # Check if password hash uses unsupported scrypt method
-            if login.password_hash and login.password_hash.startswith('scrypt'):
-                print(f"[DEBUG] Detected scrypt hash for teacher, auto-resetting password")
-                login.set_password(password)
-                db.session.commit()
-                print(f"[DEBUG] Teacher password hash updated to supported algorithm")
-        if login and login.teacher.active and login.check_password(password):
-            print("Password check succeeded")
+        if not login:
+            print(f"[TEACHER LOGIN] No login record for '{username}'")
+            flash('Username not found. Contact administrator.', 'error')
+            return render_template('teacher_login.html')
+
+        print(f"[TEACHER LOGIN] Found login for '{username}', teacher active: {login.teacher.active}, needs_reset: {login.needs_password_reset()}")
+
+        # Check teacher active status first
+        if not login.teacher.active:
+            flash('This teacher account is currently inactive. Contact administrator to activate.', 'error')
+            return render_template('teacher_login.html')
+
+        # Handle password reset for unsupported hashes
+        if login.needs_password_reset():
+            import secrets
+            temp_password = secrets.token_urlsafe(8)
+            login.set_password(temp_password)
+            db.session.commit()
+            print(f"[TEACHER LOGIN] Reset password for '{username}' to temp: {temp_password}")
+
+            # Send reset email
+            try:
+                msg = Message(
+                    subject='🔔 Teacher Password Reset - IYF Academy',
+                    recipients=[login.teacher.email],
+                    html=f'''
+                    <h2>Password Reset Required</h2>
+                    <p>Your account password was reset due to security upgrade.</p>
+                    <p><strong>Username:</strong> {username}</p>
+                    <p><strong>Temporary Password:</strong> <strong>{temp_password}</strong></p>
+                    <p><a href="http://127.0.0.1:5000/teacher/login">Login Now</a></p>
+                    <p>Change password after first login.</p>
+                    ''',
+                    sender=current_app.config['MAIL_DEFAULT_SENDER']
+                )
+                current_app.mail.send(msg)
+                print(f"[TEACHER LOGIN] Reset email sent to {login.teacher.email}")
+                flash('Password reset! Check your email for temporary password.', 'warning')
+            except Exception as e:
+                print(f"[TEACHER LOGIN] Email failed: {e}")
+                flash(f'Password reset (email unavailable). Temporary password for "{username}": {temp_password} — use this to log in now.', 'warning')
+            return render_template('teacher_login.html')
+
+        # Normal password check
+        if login.check_password(password):
+            print(f"[TEACHER LOGIN] SUCCESS for '{username}'")
             login_user(login)
-            # Set session to permanent to ensure it persists
-            from flask import session as flask_session
-            flask_session.permanent = True
-            flask_session['user_type'] = 'Teacher'
-            print(f"Logged in user: {login.teacher.name}")
-            return redirect(url_for('teacher_routes.teacher_dashboard'))
+            session.permanent = True
+            session['user_type'] = 'Teacher'
+            print(f"[TEACHER LOGIN] Redirecting to {next_url}")
+            return redirect(next_url)
         else:
-            print(f"No login record found or password failed for username={username}")
-        flash('Invalid username or password')
-    return render_template('teacher_login.html')
+            print(f"[TEACHER LOGIN] Password FAILED for '{username}'")
+            flash('Incorrect password. Password reset may be needed.', 'error')
+
+    return render_template('teacher_login.html', next_url=next_url)
 
 @teacher_routes.route('/teacher/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
@@ -501,30 +537,3 @@ def teacher_scan_qr():
         db.session.rollback()
         return jsonify({'error': f'Error processing QR: {str(e)}'}), 500
 
-@teacher_routes.route('/teacher/add', methods=['GET', 'POST'])
-@teacher_login_required
-def add_teacher():
-    if request.method == 'POST':
-        data = request.form
-        teacher = Teacher(
-            first_name=data['first_name'],
-            last_name=data['last_name'],
-            phone=data['phone'],
-            email=data['email'],
-            qualification=data['qualification'],
-            subject=data['subject']
-        )
-        db.session.add(teacher)
-        db.session.flush()
-        
-        login = TeacherLogin(
-            teacher_id=teacher.id,
-            username=data['username']
-        )
-        login.set_password(data['password'])
-        db.session.add(login)
-        db.session.commit()
-        
-        flash('Teacher added successfully')
-        return redirect(url_for('teacher_routes.teacher_dashboard'))
-    return render_template('add_teacher.html')

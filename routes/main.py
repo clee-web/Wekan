@@ -95,7 +95,7 @@ def index():
         d += timedelta(days=1)
     
     return render_template(
-        'dashboard.html',
+        'dark_dashboard.html',
         total_students=total_students,
         passport_fee_count=passport_fee_count,
         graduation_fee_count=graduation_fee_count,
@@ -181,6 +181,8 @@ def manage_payments(student_id):
         total_fee = 1500.0
         if payment_type == 'Graduation Fee':
             total_fee = 1000.0
+        elif payment_type == 'Passport Fee':
+            total_fee = 500.0
 
         payment = Payment(
             student_id=student.id,

@@ -83,7 +83,7 @@ def load_user(user_id):
     if user_type == 'SubAdmin':
         from models import SubAdmin
         return SubAdmin.query.get(user_id)
-    elif user_type == 'TeacherLogin':
+    elif user_type in ['Teacher', 'TeacherLogin']:
         from models import TeacherLogin
         return TeacherLogin.query.get(user_id)
     else:
