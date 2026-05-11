@@ -51,7 +51,7 @@
         </button>
       </form>
 
-      <form method="POST" action="{{ url_for('admin_routes.auto_fix_classes') }}" class="mt-4">
+      <form method="POST" action="{{ url_for('admin_routes.merge_classes') }}" class="mt-4">
         <button type="submit"
                 onclick="return confirm('This will automatically fix all known typos in class names. Continue?')"
                 class="w-full bg-green-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-green-700 transition-colors duration-300 shadow-lg hover:shadow-xl">

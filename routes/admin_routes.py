@@ -165,11 +165,39 @@ def delete_teacher(teacher_id):
 # =========================
 
 
-@admin_routes.route('/merge_classes')
+@admin_routes.route('/merge_classes', methods=['GET', 'POST'])
 @login_required
 def merge_classes():
-    """Merge classes page"""
+    """Merge classes page (GET) + run merge/fix (POST)."""
+    if request.method == 'POST':
+        action = request.form.get('action')
+        # If templates don't pass action, infer from which submit button exists.
+        if not action:
+            action = 'merge'
+
+        try:
+            # Use the existing SQLite helper script logic
+            from merge_classes import merge_classes as run_merge_classes
+            from merge_classes import merge_sessions
+            from merge_classes import normalize_class_name
+
+            if action == 'fix_typos':
+                # Keep simple: first merge session variants then merge class variants
+                merge_sessions()
+                run_merge_classes()
+                flash('Class names auto-fixed successfully.', 'success')
+            else:
+                merge_sessions()
+                run_merge_classes()
+                flash('Classes merged successfully.', 'success')
+        except Exception as e:
+            flash(f'Failed to merge/fix classes: {e}', 'error')
+
+        return redirect(url_for('admin_routes.merge_classes'))
+
+    # GET
     return render_template('merge_classes.html')
+
 
 
 @admin_routes.route('/manage_subadmins')

@@ -484,8 +484,79 @@
     </div>
   </div>
 
+  <!-- Date picker (Attendance totals per class) -->
+  <div style="margin-bottom: 1.5rem; display: flex; justify-content: flex-end;">
+    <form method="get" action="{{ url_for('main.index') }}" style="display:flex; gap:0.75rem; align-items:center;">
+      <input type="date" name="date" value="{{ request.args.get('date','') }}" style="padding: 0.625rem 0.75rem; border-radius: 10px; border: 1px solid var(--border-subtle); background: var(--bg-elevated); color: var(--text-primary); font-weight: 600;" />
+      <button type="submit" style="background: var(--accent-teal); color: white; padding: 0.625rem 1.25rem; border-radius: 10px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 6px 20px rgba(20, 184, 166, 0.15);">Go</button>
+    </form>
+  </div>
+
+  <!-- Attendance totals per class (selected date) -->
+  <div class="content-card animate-in" style="margin-bottom: 1.5rem;">
+    <div class="card-header" style="margin-bottom: 1rem;">
+      <div class="card-title">
+        <div class="card-title-icon" style="background: linear-gradient(135deg, var(--accent-teal) 0%, var(--accent-blue) 100%);">
+          <i class="fas fa-user-check"></i>
+        </div>
+        Attendance by Class
+      </div>
+      <div style="display:flex; gap:0.75rem; align-items:center;">
+        <span style="background: rgba(34,197,94,0.12); color: #4ade80; padding: 0.5rem 0.75rem; border-radius: 12px; font-weight: 800; font-size: 0.875rem;">
+          Present: {{ attendance_stats|sum(attribute='present') }}
+        </span>
+        <span style="background: rgba(148,163,184,0.12); color: #e5e7eb; padding: 0.5rem 0.75rem; border-radius: 12px; font-weight: 800; font-size: 0.875rem;">
+          Total: {{ attendance_stats|sum(attribute='total') }}
+        </span>
+      </div>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding: 0.75rem 0.75rem; font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.04em; border-bottom: 1px solid rgba(148,163,184,0.12);">Class</th>
+            <th style="text-align:left; padding: 0.75rem 0.75rem; font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.04em; border-bottom: 1px solid rgba(148,163,184,0.12);">Total</th>
+            <th style="text-align:left; padding: 0.75rem 0.75rem; font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.04em; border-bottom: 1px solid rgba(148,163,184,0.12);">Present</th>
+            <th style="text-align:left; padding: 0.75rem 0.75rem; font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.04em; border-bottom: 1px solid rgba(148,163,184,0.12);">Absent</th>
+            <th style="text-align:left; padding: 0.75rem 0.75rem; font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.04em; border-bottom: 1px solid rgba(148,163,184,0.12);">Rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for stat in attendance_stats %}
+          {% set rate = (stat.present / stat.total * 100) | round(1) if stat.total > 0 else 0 %}
+          <tr>
+            <td style="padding: 0.75rem 0.75rem; color: var(--text-primary); border-bottom: 1px solid rgba(148,163,184,0.08);">{{ stat.class_name }}</td>
+            <td style="padding: 0.75rem 0.75rem; color: var(--text-primary); border-bottom: 1px solid rgba(148,163,184,0.08);">{{ stat.total }}</td>
+            <td style="padding: 0.75rem 0.75rem; color: #22c55e; font-weight: 800; border-bottom: 1px solid rgba(148,163,184,0.08);">{{ stat.present }}</td>
+            <td style="padding: 0.75rem 0.75rem; color: #ef4444; font-weight: 800; border-bottom: 1px solid rgba(148,163,184,0.08);">{{ stat.absent }}</td>
+            <td style="padding: 0.75rem 0.75rem; border-bottom: 1px solid rgba(148,163,184,0.08);">
+              {% if stat.total > 0 %}
+                <span style="padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 800; background: rgba(148,163,184,0.12); color: var(--text-primary);">
+                  {{ rate }}%
+                </span>
+              {% else %}
+                <span style="color: var(--text-muted);">-</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+
+          {% if attendance_stats|length == 0 %}
+          <tr>
+            <td colspan="5" style="padding: 1.5rem 0.75rem; color: var(--text-muted); text-align:center;">No attendance records for selected date.</td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   <!-- Main Content Grid -->
   <div class="content-grid">
+
+
+
     <!-- Attendance Trend Chart -->
     <div class="content-card animate-in">
       <div class="card-header">
@@ -500,6 +571,34 @@
       <div class="chart-container">
         <canvas id="attendanceChart"></canvas>
       </div>
+
+      <!-- Attendance change by class (previous Saturday vs last Saturday) -->
+      <div style="margin-top: 1.25rem;">
+        <h3 style="color: var(--text-secondary); font-size: 0.9rem; font-weight: 600; margin-bottom: 0.75rem;">Attendance change by class</h3>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+
+          {% for item in attendance_class_arrows %}
+            <div style="border: 1px solid var(--border-subtle); background: var(--bg-elevated); border-radius: 12px; padding: 0.5rem 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+              <span style="font-size: 0.95rem;">
+                {% if item.direction == 'up' %}
+                  <span style="color: #22c55e;">⬆️</span>
+                {% elif item.direction == 'down' %}
+                  <span style="color: #ef4444;">⬇️</span>
+                {% else %}
+                  <span style="color: #94a3b8;">➡️</span>
+                {% endif %}
+              </span>
+              <span style="color: var(--text-primary); font-weight: 600; font-size: 0.85rem;">{{ item.class_name }}</span>
+              <span style="color: var(--text-muted); font-size: 0.8rem;">{{ item.previous_saturday }} → {{ item.last_saturday }}</span>
+            </div>
+          {% endfor %}
+
+          {% if attendance_class_arrows|length == 0 %}
+            <div style="color: var(--text-muted);">No Saturday attendance data available yet.</div>
+          {% endif %}
+        </div>
+      </div>
+
     </div>
 
     <!-- Sessions -->

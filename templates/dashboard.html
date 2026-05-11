@@ -174,8 +174,15 @@
   <div class="bg-white rounded-xl shadow-soft overflow-hidden mb-12">
 
     <div class="px-6 py-4 border-b bg-gradient-to-r from-green-50 to-emerald-100">
-      <div class="flex items-center justify-between">
-        <h2 class="text-xl font-semibold">Today's Attendance by Class</h2>
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <h2 class="text-xl font-semibold">Attendance by Class</h2>
+          <form method="get" action="{{ url_for('main.index') }}" class="flex items-center gap-3">
+            <input type="date" name="date" value="{{ request.args.get('date','') }}" class="px-3 py-2 border border-gray-200 rounded-xl bg-white shadow-sm text-sm font-semibold" />
+
+            <button type="submit" class="px-4 py-2 bg-emerald-500 text-white rounded-xl shadow-md font-bold text-sm hover:bg-emerald-600 transition">Go</button>
+          </form>
+        </div>
         <div class="flex items-center space-x-3">
           <span class="px-4 py-2 bg-green-500 text-white rounded-xl shadow-md font-bold text-lg">
             ✅ Present: {{ attendance_stats|sum(attribute='present') }}
@@ -186,6 +193,7 @@
         </div>
       </div>
     </div>
+
 
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y">

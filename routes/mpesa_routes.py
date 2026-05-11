@@ -54,12 +54,15 @@ def initiate_payment():
             transaction_number=reference,
             amount=amount,
             payment_type='Graduation Fee' if amount >= 1000 else 'Passport Fee',
+            session=student.session,
+
             payment_method='mpesa',
             status='pending',
             year=datetime.now().strftime('%Y'),
-            session='current',
             notes=f"M-PESA payment initiated for phone {phone}"
+
         )
+
         db.session.add(payment)
         db.session.commit()
 

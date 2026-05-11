@@ -46,24 +46,48 @@ def index():
     # Calculate stats for current session only
     total_students = Student.query.filter_by(active=True).count()
     
-    # Count distinct active students with ANY cleared/partial payment of that type in current session
-    passport_query = db.session.query(Student.id).distinct().join(Payment).filter(
-        Payment.payment_type == 'Passport Fee',
-        Student.active == True,
-        Payment.status.in_(['cleared', 'partial'])
+    # Fees paid counters are based on cumulative amount thresholds
+    # Passport: >= 500, Graduation: >= 1000 (current session only)
+
+    passport_subq = (
+        db.session.query(Student.id.label('student_id'))
+        .join(Payment)
+        .filter(
+            Payment.payment_type == 'Passport Fee',
+            Student.active == True,
+        )
     )
     if current_session:
-        passport_query = passport_query.filter(Student.session == current_session)
-    passport_fee_count = passport_query.count()
-    
-    graduation_query = db.session.query(Student.id).distinct().join(Payment).filter(
-        Payment.payment_type == 'Graduation Fee',
-        Student.active == True,
-        Payment.status.in_(['cleared', 'partial'])
+        passport_subq = passport_subq.filter(Student.session == current_session)
+
+    passport_fee_count = (
+        db.session.query(Student.id)
+        .join(Payment, Student.id == Payment.student_id)
+        .filter(
+            Payment.payment_type == 'Passport Fee',
+            Student.active == True,
+        )
+        .group_by(Student.id)
+        .having(func.sum(Payment.amount) >= 500)
     )
     if current_session:
-        graduation_query = graduation_query.filter(Student.session == current_session)
-    graduation_fee_count = graduation_query.count()
+        passport_fee_count = passport_fee_count.filter(Student.session == current_session)
+    passport_fee_count = passport_fee_count.count()
+
+    graduation_fee_count = (
+        db.session.query(Student.id)
+        .join(Payment, Student.id == Payment.student_id)
+        .filter(
+            Payment.payment_type == 'Graduation Fee',
+            Student.active == True,
+        )
+        .group_by(Student.id)
+        .having(func.sum(Payment.amount) >= 1000)
+    )
+    if current_session:
+        graduation_fee_count = graduation_fee_count.filter(Student.session == current_session)
+    graduation_fee_count = graduation_fee_count.count()
+
     
     # Calculate total revenue from all cleared payments (keep all-time)
     total_revenue = db.session.query(db.func.sum(Payment.amount)).filter(Payment.status == 'cleared').scalar() or 0
@@ -93,7 +117,112 @@ def index():
     while d <= end_date:
         trend_data.append({"date": d.isoformat(), "present": int(present_by_date.get(d, 0))})
         d += timedelta(days=1)
-    
+
+    # Attendance change arrows per class (previous Saturday vs last Saturday)
+    # Determine last Saturday (<= end_date) and previous Saturday (7 days earlier).
+    weekday = end_date.weekday()  # Mon=0 ... Sun=6
+    days_since_saturday = (weekday - 5) % 7  # Saturday=5
+    last_saturday = end_date - timedelta(days=days_since_saturday)
+    previous_saturday = last_saturday - timedelta(days=7)
+
+    attendance_prev = dict(
+        db.session.query(Student.class_name, func.count(Attendance.id))
+        .join(Attendance, Student.id == Attendance.student_id)
+        .filter(Student.active == True)
+        .filter(Attendance.date == previous_saturday)
+        .filter(Attendance.status == 'present')
+        .group_by(Student.class_name)
+        .all()
+    )
+
+    attendance_last = dict(
+        db.session.query(Student.class_name, func.count(Attendance.id))
+        .join(Attendance, Student.id == Attendance.student_id)
+        .filter(Student.active == True)
+        .filter(Attendance.date == last_saturday)
+        .filter(Attendance.status == 'present')
+        .group_by(Student.class_name)
+        .all()
+    )
+
+    all_classes_for_arrows = sorted(set(attendance_prev.keys()) | set(attendance_last.keys()) )
+    attendance_class_arrows = []
+    for cls_name in all_classes_for_arrows:
+        prev_cnt = int(attendance_prev.get(cls_name, 0) or 0)
+        last_cnt = int(attendance_last.get(cls_name, 0) or 0)
+        delta = last_cnt - prev_cnt
+        if delta > 0:
+            direction = 'up'
+        elif delta < 0:
+            direction = 'down'
+        else:
+            direction = 'flat'
+        attendance_class_arrows.append({
+            'class_name': cls_name,
+            'previous_saturday': prev_cnt,
+            'last_saturday': last_cnt,
+            'direction': direction,
+        })
+
+    # Attendance totals per class for selected date (default: today)
+    date_str = request.args.get('date', '').strip()
+    try:
+        selected_date = datetime.strptime(date_str, '%Y-%m-%d').date() if date_str else datetime.utcnow().date()
+    except ValueError:
+        selected_date = datetime.utcnow().date()
+
+    attendance_stats = []
+    attendance_stats_rows = db.session.query(
+            Student.class_name.label('class_name'),
+            func.count(Attendance.id).label('total'),
+            func.sum(db.case((Attendance.status == 'present', 1), else_=0)).label('present'),
+            func.sum(db.case((Attendance.status == 'absent', 1), else_=0)).label('absent'),
+        )\
+        .join(Attendance, Student.id == Attendance.student_id)\
+        .filter(Student.active == True)\
+        .filter(Attendance.date == selected_date)\
+        .group_by(Student.class_name)\
+        .order_by(Student.class_name)\
+        .all()
+
+    attendance_stats = attendance_stats_rows
+
+    # Ensure `total` is students registered in the class (not total attendance rows)
+    registered_totals = dict(
+        db.session.query(Student.class_name, func.count(Student.id))
+        .filter(Student.active == True)
+        .group_by(Student.class_name)
+        .all()
+    )
+
+    attendance_stats = [
+        {
+            'class_name': (row.class_name or '').strip(),
+            'total': int(registered_totals.get((row.class_name or '').strip(), 0) or 0),
+            'present': int(row.present or 0),
+            'absent': int(row.absent or 0),
+        }
+        for row in attendance_stats
+        if (row.class_name or '').strip()
+    ]
+
+    # If a class has 0 attendance rows on that date, it won't appear in `attendance_stats`.
+    # Add them with present/absent = 0.
+    missing_classes = set(registered_totals.keys()) - {s['class_name'] for s in attendance_stats}
+    for cls_name in missing_classes:
+        cls_name_clean = (cls_name or '').strip()
+        if cls_name_clean:
+            attendance_stats.append({
+                'class_name': cls_name_clean,
+                'total': int(registered_totals.get(cls_name_clean) or 0),
+                'present': 0,
+                'absent': 0,
+            })
+
+    attendance_stats.sort(key=lambda x: x['class_name'])
+
+
+
     return render_template(
         'dark_dashboard.html',
         total_students=total_students,
@@ -103,6 +232,8 @@ def index():
         total_revenue=total_revenue,
         sessions_data=sessions_data,
         trend_data=trend_data,
+        attendance_class_arrows=attendance_class_arrows,
+        attendance_stats=attendance_stats,
     )
 
 @main_routes.route('/students')

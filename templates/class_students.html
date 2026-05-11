@@ -38,13 +38,21 @@
     </div>
 
     <div class="bg-white rounded-3xl shadow-lg border border-gray-100 p-8 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
-      <div class="flex items-center">
+              <div class="flex items-center">
         <div class="p-4 rounded-2xl bg-emerald-100 text-emerald-600">
           <i class="fas fa-check-circle text-2xl"></i>
         </div>
         <div class="ml-6">
           <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Present Today</p>
 {{ attendance_records.values() | selectattr('status', 'equalto', 'present') | list | length }}
+        </div>
+      </div>
+      <div class="mt-6">
+        <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Advance Sign Language (On Class)</p>
+        <div class="mt-2 flex items-center gap-2">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+            <i class="fas fa-sign-language mr-2"></i>Enabled
+          </span>
         </div>
       </div>
     </div>
